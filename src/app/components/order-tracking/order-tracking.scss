@@ -1,0 +1,167 @@
+.tracking {
+  padding: 16px 0;
+}
+
+.tracking-pipeline {
+  display: flex;
+  align-items: flex-start;
+  overflow-x: auto;
+  padding-bottom: 10px;
+}
+
+.tracking-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  min-width: 80px;
+  flex: 1;
+}
+
+.step-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  transition: all 0.3s;
+
+  .step-number {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #999;
+  }
+}
+
+.step-line {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  width: 100%;
+  height: 2px;
+  background: #e0e0e0;
+  z-index: 0;
+  transition: background 0.3s;
+
+  &.filled {
+    background: #3a5a2c;
+  }
+}
+
+.tracking-step.completed .step-dot {
+  background: #3a5a2c;
+  .step-number { color: #fff; }
+}
+
+.tracking-step.active .step-dot {
+  background: #3a5a2c;
+  box-shadow: 0 0 0 4px rgba(58, 90, 44, 0.2);
+  .step-number { color: #fff; }
+}
+
+.step-label {
+  font-size: 0.8rem;
+  color: #666;
+  text-align: center;
+  margin-top: 6px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.tracking-step.completed .step-label,
+.tracking-step.active .step-label {
+  color: #3a5a2c;
+  font-weight: 600;
+}
+
+.step-time {
+  font-size: 0.7rem;
+  color: #666;
+  text-align: center;
+  margin-top: 2px;
+}
+
+.tracking-rejected, .tracking-cancelled {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  text-align: center;
+}
+
+.rejected-icon, .cancelled-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.rejected-icon {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.cancelled-icon {
+  background: #e2e3e5;
+  color: #383d41;
+}
+
+.rejected-reason {
+  font-size: 0.8rem;
+  color: #555;
+  font-style: italic;
+  margin-top: 4px;
+}
+
+@media (max-width: 600px) {
+  .tracking-pipeline {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    padding-left: 16px;
+  }
+
+  .tracking-step {
+    flex-direction: row;
+    align-items: center;
+    min-width: unset;
+    gap: 12px;
+    padding: 8px 0;
+    position: relative;
+  }
+
+  .step-dot {
+    flex-shrink: 0;
+  }
+
+  .step-line {
+    display: none;
+  }
+
+  .tracking-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 16px;
+    width: 2px;
+    height: calc(100% + 0px);
+    background: #e0e0e0;
+    z-index: 0;
+  }
+
+  .tracking-step.completed:not(:last-child)::after,
+  .tracking-step.active:not(:last-child)::after {
+    background: #3a5a2c;
+  }
+
+  .step-label { text-align: left; margin-top: 0; font-size: 0.85rem; }
+  .step-time { margin-top: 0; margin-left: 4px; font-size: 0.75rem; }
+}

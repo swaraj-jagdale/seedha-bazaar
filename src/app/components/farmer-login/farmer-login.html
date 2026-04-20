@@ -1,0 +1,127 @@
+<div class="farmer-login">
+  <div class="login-container">
+    <div class="login-card">
+      @if (isRegistering()) {
+        <h2>{{ lang.t('farmerLogin.registerTitle') }}</h2>
+        <p class="subtitle">{{ lang.t('farmerLogin.registerSubtitle') }}</p>
+
+        @if (error()) {
+          <div class="error-msg">{{ error() }}</div>
+        }
+
+        <form (ngSubmit)="onRegister()">
+          <div class="form-group">
+            <label>{{ lang.t('farmerLogin.farmerName') }} *</label>
+            <input type="text" [(ngModel)]="displayName" name="displayName" placeholder="e.g. Ramesh Patil" required maxlength="100" />
+          </div>
+          <div class="form-group">
+            <label>{{ lang.t('farmerLogin.phone') }} *</label>
+            <input type="tel" [(ngModel)]="phone" name="phone" placeholder="e.g. 9876543210" required maxlength="10" />
+          </div>
+          <div class="form-row">
+            <div class="form-group half">
+              <label>{{ lang.t('login.email') }} *</label>
+              <input type="email" [(ngModel)]="email" name="email" required maxlength="100" />
+            </div>
+            <div class="form-group half">
+              <label>{{ lang.t('login.password') }} *</label>
+              <input type="password" [(ngModel)]="password" name="password" minlength="6" required maxlength="128" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group half">
+              <label>{{ lang.t('farmerLogin.village') }}</label>
+              <input type="text" [(ngModel)]="village" name="village" maxlength="100" />
+            </div>
+            <div class="form-group half">
+              <label>{{ lang.t('login.district') }}</label>
+              <input type="text" [(ngModel)]="district" name="district" maxlength="50" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group half">
+              <label>{{ lang.t('login.taluka') }}</label>
+              <input type="text" [(ngModel)]="taluka" name="taluka" maxlength="50" />
+            </div>
+            <div class="form-group half">
+              <label>{{ lang.t('login.pincode') }}</label>
+              <input type="text" [(ngModel)]="pincode" name="pincode" maxlength="6" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>{{ lang.t('farmerLogin.acreage') }}</label>
+            <input type="number" [(ngModel)]="acreage" name="acreage" min="0.5" step="0.5" max="10000" />
+          </div>
+          <div class="form-group">
+            <label>{{ lang.t('farmerLogin.selectCrops') }}</label>
+            <div class="crop-chips">
+              @for (crop of cropOptions; track crop) {
+                <button type="button" class="crop-chip" [class.selected]="selectedCrops().includes(crop)" (click)="toggleCrop(crop)">
+                  {{ crop }}
+                </button>
+              }
+            </div>
+          </div>
+          <button type="submit" class="submit-btn" [disabled]="isLoading()">
+            {{ isLoading() ? lang.t('login.pleaseWait') : lang.t('login.createAccount') }}
+          </button>
+        </form>
+        <p class="switch-text">
+          {{ lang.t('login.alreadyAccount') }}
+          <a (click)="isRegistering.set(false)">{{ lang.t('login.loginHere') }}</a>
+        </p>
+      } @else {
+        <h2>{{ lang.t('farmerLogin.loginTitle') }}</h2>
+        <p class="subtitle">{{ lang.t('farmerLogin.loginSubtitle') }}</p>
+
+        @if (error()) {
+          <div class="error-msg">{{ error() }}</div>
+        }
+
+        <form (ngSubmit)="onLogin()">
+          <div class="form-group">
+            <label>{{ lang.t('login.email') }}</label>
+            <input type="email" [(ngModel)]="loginEmail" name="loginEmail" required maxlength="100" />
+          </div>
+          <div class="form-group">
+            <label>{{ lang.t('login.password') }}</label>
+            <input type="password" [(ngModel)]="loginPassword" name="loginPassword" required maxlength="128" />
+          </div>
+          <button type="submit" class="submit-btn" [disabled]="isLoading()">
+            {{ isLoading() ? lang.t('login.pleaseWait') : lang.t('login.loginBtn') }}
+          </button>
+
+          <div class="forgot-password">
+            <button type="button" (click)="showForgotPassword.set(true)">Forgot password?</button>
+          </div>
+        </form>
+
+        @if (showForgotPassword()) {
+          <div class="reset-form">
+            <h3>Reset Password</h3>
+            <p class="reset-desc">Enter your email and we'll send you a password reset link.</p>
+            @if (resetSuccess()) {
+              <div class="success-msg">{{ resetSuccess() }}</div>
+            }
+            <div class="form-group">
+              <input type="email" [(ngModel)]="resetEmail" placeholder="Your email address" />
+            </div>
+            <div class="reset-actions">
+              <button class="submit-btn" (click)="sendResetEmail()" [disabled]="isLoading()">Send Reset Email</button>
+              <button class="cancel-link" (click)="showForgotPassword.set(false); error.set(''); resetSuccess.set('')">Back to login</button>
+            </div>
+          </div>
+        }
+
+        <p class="switch-text">
+          {{ lang.t('farmerLogin.newFarmer') }}
+          <a (click)="isRegistering.set(true)">{{ lang.t('login.registerHere') }}</a>
+        </p>
+      }
+
+      <div class="merchant-link-container">
+        <a routerLink="/merchant/login">{{ lang.t('farmerLogin.areMerchant') }}</a>
+      </div>
+    </div>
+  </div>
+</div>

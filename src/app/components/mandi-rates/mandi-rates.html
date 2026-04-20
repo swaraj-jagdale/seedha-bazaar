@@ -1,0 +1,67 @@
+<section class="mandi-rates" id="rates">
+  <div class="mandi-rates-container">
+    <h2 class="section-title">{{ lang.t('rates.title') }}</h2>
+    <div class="subtitle-row">
+      <p class="subtitle">
+        {{ lang.t('rates.subtitle') }} <strong>{{ selectedMandi() }}</strong>, {{ lang.t('rates.updatedAt') }} ({{ todayDate }})
+      </p>
+      <div class="mandi-select">
+        <select (change)="onMandiChange($event)">
+          @for (mandi of mandis; track mandi) {
+            <option [value]="mandi">{{ mandi }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    @if (loading()) {
+      <div class="rates-grid">
+        @for (i of [1,2,3,4,5,6]; track i) {
+          <div class="rate-card skeleton-card">
+            <div class="skeleton-img"></div>
+            <div class="skeleton-header">
+              <div class="skeleton-line wide"></div>
+            </div>
+            <div class="skeleton-body">
+              <div class="skeleton-line"></div>
+              <div class="skeleton-line"></div>
+              <div class="skeleton-line"></div>
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+    <div class="rates-grid">
+      @for (crop of displayRates(); track crop.name) {
+        <div class="rate-card">
+          <div class="rate-card-img">
+            <img [src]="ratesService.getCropImage(crop.name)" [alt]="crop.name" class="crop-img">
+          </div>
+          <div class="rate-card-header">
+            <h3 class="crop-name">{{ crop.name }}</h3>
+          </div>
+          <div class="rate-card-body">
+            <div class="grade-row">
+              <span class="grade-label">{{ lang.t('rates.gradeA') }}</span>
+              <span class="grade-price grade-a">{{ crop.gradeA }}/kg</span>
+            </div>
+            <div class="grade-row">
+              <span class="grade-label">{{ lang.t('rates.gradeB') }}</span>
+              <span class="grade-price grade-b">{{ crop.gradeB }}/kg</span>
+            </div>
+            <div class="grade-row">
+              <span class="grade-label">{{ lang.t('rates.gradeC') }}</span>
+              <span class="grade-price grade-c">{{ crop.gradeC }}/kg</span>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+    }
+
+    <div class="call-cta">
+      <a href="tel:9432446384" class="call-btn">{{ lang.t('rates.callNow') }}: 9432446384</a>
+      <p class="call-subtitle">{{ lang.t('rates.callSubtitle') }}</p>
+    </div>
+  </div>
+</section>

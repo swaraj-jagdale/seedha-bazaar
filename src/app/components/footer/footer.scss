@@ -1,0 +1,123 @@
+.footer {
+  background: #f8f6f0;
+}
+
+.cta-banner {
+  background: #e8f0e0;
+  padding: 18px 20px;
+  border-bottom: 1px solid #d4e4c8;
+}
+
+.cta-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.cta-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.95rem;
+  color: #2c2c2c;
+
+  strong {
+    color: #3a5a2c;
+    font-weight: 700;
+  }
+}
+
+.cta-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cta-logo-text {
+  .logo-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+
+    .seedha {
+      color: #3a5a2c;
+    }
+
+    .bazaar {
+      color: #2c2c2c;
+      font-weight: 800;
+    }
+  }
+}
+
+.footer-bottom {
+  padding: 25px 20px;
+}
+
+.footer-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  gap: 60px;
+  flex-wrap: wrap;
+}
+
+.footer-col {
+  h4 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #2c2c2c;
+    margin-bottom: 6px;
+  }
+
+  a {
+    display: block;
+    font-size: 0.9rem;
+    color: #555;
+    padding: 10px 0;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    transition: color 0.3s;
+
+    &:hover {
+      color: #3a5a2c;
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .cta-container {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .cta-left {
+    flex-direction: column;
+    font-size: 0.85rem;
+  }
+
+  .footer-container {
+    gap: 20px;
+    flex-direction: column;
+  }
+
+  .footer-col {
+    text-align: center;
+  }
+}
+
+.footer-copyright {
+  border-top: 1px solid #e0ddd5;
+  padding: 16px 20px;
+  text-align: center;
+
+  p {
+    font-size: 0.82rem;
+    color: #888;
+    margin: 0;
+  }
+}

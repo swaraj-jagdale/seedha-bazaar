@@ -1,0 +1,104 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidString(field, maxLen) {
+      return field is string && field.size() <= maxLen;
+    }
+
+    // Merchants collection
+    match /merchants/{merchantId} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(merchantId)
+                    && isValidString(request.resource.data.displayName, 100)
+                    && isValidString(request.resource.data.email, 100);
+      allow update: if isOwner(merchantId)
+                    && isValidString(request.resource.data.displayName, 100)
+                    && isValidString(request.resource.data.email, 100);
+      allow delete: if false;
+    }
+
+    // Farmers collection
+    match /farmers/{farmerId} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(farmerId)
+                    && isValidString(request.resource.data.displayName, 100)
+                    && isValidString(request.resource.data.email, 100);
+      allow update: if isOwner(farmerId)
+                    && isValidString(request.resource.data.displayName, 100)
+                    && isValidString(request.resource.data.email, 100);
+      allow delete: if false;
+    }
+
+    // Rates collection
+    match /rates/{rateId} {
+      // Anyone can read rates (public mandi rates)
+      allow read: if true;
+      // Only the merchant who owns the rate can create/update/delete
+      allow create: if isAuthenticated()
+                    && request.resource.data.merchantId == request.auth.uid
+                    && request.resource.data.pricePerUnit is number
+                    && request.resource.data.pricePerUnit > 0
+                    && request.resource.data.pricePerUnit < 100000;
+      allow update: if isAuthenticated()
+                    && resource.data.merchantId == request.auth.uid
+                    && request.resource.data.pricePerUnit is number
+                    && request.resource.data.pricePerUnit > 0
+                    && request.resource.data.pricePerUnit < 100000;
+      allow delete: if isAuthenticated()
+                    && resource.data.merchantId == request.auth.uid;
+    }
+
+    // Orders collection
+    match /orders/{orderId} {
+      // Farmers can read their own orders, merchants can read orders assigned to them
+      allow read: if isAuthenticated()
+                  && (resource.data.farmerId == request.auth.uid
+                      || resource.data.merchantId == request.auth.uid);
+
+      // Farmers can create orders (must be their own farmerId)
+      allow create: if isAuthenticated()
+                    && request.resource.data.farmerId == request.auth.uid
+                    && request.resource.data.status == 'requested'
+                    && request.resource.data.totalAmount is number
+                    && request.resource.data.totalAmount > 0;
+
+      // Farmer can only cancel their own order when status is 'requested'
+      allow update: if isAuthenticated()
+                    && resource.data.farmerId == request.auth.uid
+                    && resource.data.status == 'requested'
+                    && request.resource.data.status == 'cancelled'
+                    && request.resource.data.farmerId == resource.data.farmerId
+                    && request.resource.data.merchantId == resource.data.merchantId
+                    && request.resource.data.totalAmount == resource.data.totalAmount
+                    && request.resource.data.commission == resource.data.commission;
+
+      // Merchant can update status, logistics, and payment info on their orders
+      allow update: if isAuthenticated()
+                    && resource.data.merchantId == request.auth.uid
+                    && request.resource.data.farmerId == resource.data.farmerId
+                    && request.resource.data.merchantId == resource.data.merchantId
+                    && request.resource.data.totalAmount == resource.data.totalAmount
+                    && request.resource.data.commission == resource.data.commission
+                    && request.resource.data.pricePerUnit == resource.data.pricePerUnit;
+
+      // Orders cannot be deleted
+      allow delete: if false;
+    }
+
+    // Deny all other collections by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

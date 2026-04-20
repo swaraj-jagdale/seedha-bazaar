@@ -1,0 +1,156 @@
+<div class="login-page">
+  <div class="login-card">
+    <div class="login-header">
+      <img src="assets/images/logo.svg" alt="Seedha Bazaar Logo" width="40" height="40">
+      <h2>{{ isRegister() ? lang.t('login.registerTitle') : lang.t('login.title') }}</h2>
+      <p class="login-subtitle">{{ isRegister() ? lang.t('login.registerSubtitle') : lang.t('login.loginSubtitle') }}</p>
+    </div>
+
+    @if (error()) {
+      <div class="error-msg">{{ error() }}</div>
+    }
+
+    <form (ngSubmit)="onSubmit()">
+      @if (isRegister()) {
+        <div class="form-group">
+          <label for="displayName">{{ lang.t('login.businessName') }} *</label>
+          <input
+            id="displayName"
+            type="text"
+            [(ngModel)]="displayName"
+            name="displayName"
+            placeholder="e.g. Sharma Traders"
+            required
+            maxlength="100"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="phone">{{ lang.t('login.phone') }} *</label>
+          <input
+            id="phone"
+            type="tel"
+            [(ngModel)]="phone"
+            name="phone"
+            placeholder="e.g. 9876543210"
+            required
+            maxlength="10"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="address">{{ lang.t('login.address') }}</label>
+          <input
+            id="address"
+            type="text"
+            [(ngModel)]="address"
+            name="address"
+            placeholder="Shop/Office address"
+            maxlength="200"
+          />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="district">{{ lang.t('login.district') }}</label>
+            <input
+              id="district"
+              type="text"
+              [(ngModel)]="district"
+              name="district"
+              placeholder="e.g. Dhule"
+              maxlength="50"
+            />
+          </div>
+          <div class="form-group">
+            <label for="taluka">{{ lang.t('login.taluka') }}</label>
+            <input
+              id="taluka"
+              type="text"
+              [(ngModel)]="taluka"
+              name="taluka"
+              placeholder="e.g. Sakri"
+              maxlength="50"
+            />
+          </div>
+        </div>
+
+        <div class="form-group half-width">
+          <label for="pincode">{{ lang.t('login.pincode') }}</label>
+          <input
+            id="pincode"
+            type="text"
+            [(ngModel)]="pincode"
+            name="pincode"
+            placeholder="e.g. 424001"
+            maxlength="6"
+          />
+        </div>
+      }
+
+      <div class="form-group">
+        <label for="email">{{ lang.t('login.email') }} *</label>
+        <input
+          id="email"
+          type="email"
+          [(ngModel)]="email"
+          name="email"
+          placeholder="merchant@example.com"
+          required
+          maxlength="100"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="password">{{ lang.t('login.password') }} *</label>
+        <input
+          id="password"
+          type="password"
+          [(ngModel)]="password"
+          name="password"
+          placeholder="Min. 6 characters"
+          required
+          maxlength="128"
+        />
+      </div>
+
+      <button type="submit" class="submit-btn" [disabled]="loading()">
+        {{ loading() ? lang.t('login.pleaseWait') : (isRegister() ? lang.t('login.createAccount') : lang.t('login.loginBtn')) }}
+      </button>
+
+      @if (!isRegister()) {
+        <div class="forgot-password">
+          <button type="button" (click)="showForgotPassword.set(true)">Forgot password?</button>
+        </div>
+      }
+    </form>
+
+    @if (showForgotPassword()) {
+      <div class="reset-form">
+        <h3>Reset Password</h3>
+        <p class="reset-desc">Enter your email and we'll send you a password reset link.</p>
+        @if (resetSuccess()) {
+          <div class="success-msg">{{ resetSuccess() }}</div>
+        }
+        <div class="form-group">
+          <input type="email" [(ngModel)]="resetEmail" placeholder="Your email address" />
+        </div>
+        <div class="reset-actions">
+          <button class="submit-btn" (click)="sendResetEmail()" [disabled]="loading()">Send Reset Email</button>
+          <button class="cancel-link" (click)="showForgotPassword.set(false); error.set(''); resetSuccess.set('')">Back to login</button>
+        </div>
+      </div>
+    }
+
+    <div class="toggle-mode">
+      @if (isRegister()) {
+        <p>{{ lang.t('login.alreadyAccount') }} <button (click)="toggleMode()">{{ lang.t('login.loginHere') }}</button></p>
+      } @else {
+        <p>{{ lang.t('login.newMerchant') }} <button (click)="toggleMode()">{{ lang.t('login.registerHere') }}</button></p>
+      }
+    </div>
+    <div class="farmer-link-container">
+      <a routerLink="/farmer/login">{{ lang.t('farmerLogin.areFarmer') }}</a>
+    </div>
+  </div>
+</div>

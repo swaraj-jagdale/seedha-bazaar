@@ -1,0 +1,259 @@
+<div class="farmer-dashboard">
+  <div class="dashboard-container">
+    <div class="dashboard-header">
+      <div class="welcome">
+        <h2>{{ lang.t('farmerDashboard.title') }}</h2>
+        <p>{{ lang.t('dashboard.welcome') }}, <strong>{{ authService.currentUser()?.displayName || 'Farmer' }}</strong></p>
+      </div>
+      <div class="dashboard-actions">
+        <button class="tab-btn" [class.active]="activeTab() === 'rates'" (click)="activeTab.set('rates')">
+          {{ lang.t('farmerDashboard.browseRates') }}
+        </button>
+        <button class="tab-btn" [class.active]="activeTab() === 'orders'" (click)="activeTab.set('orders')">
+          {{ lang.t('farmerDashboard.myOrders') }}
+          @if (activeOrders().length > 0) {
+            <span class="badge">{{ activeOrders().length }}</span>
+          }
+        </button>
+        <button class="logout-btn" (click)="logout()">{{ lang.t('dashboard.logout') }}</button>
+      </div>
+    </div>
+
+    @if (orderSuccess()) {
+      <div class="success-toast">Order placed successfully! The merchant will review your order.</div>
+    }
+
+    @if (activeTab() === 'rates') {
+      <!-- RATES BROWSING -->
+      <div class="filters">
+        <input type="text" class="filter-input" [placeholder]="lang.t('farmerDashboard.searchCrop')" [ngModel]="filterCrop()" (ngModelChange)="filterCrop.set($event)" />
+        <select class="filter-select" [ngModel]="filterMandi()" (ngModelChange)="filterMandi.set($event)">
+          <option value="">{{ lang.t('farmerDashboard.allMandis') }}</option>
+          @for (m of mandis; track m) {
+            @if (m) {
+              <option [value]="m">{{ m }}</option>
+            }
+          }
+        </select>
+      </div>
+
+      @if (filteredRates().length === 0) {
+        <div class="empty-state">
+          <p>{{ lang.t('farmerDashboard.noRates') }}</p>
+        </div>
+      } @else {
+        <div class="rates-grid">
+          @for (rate of filteredRates(); track rate.id) {
+            <div class="rate-card">
+              <div class="rate-card-img">
+                <img [src]="ratesService.getCropImage(rate.crop)" [alt]="rate.crop" class="crop-img">
+              </div>
+              <div class="rate-card-header">
+                <div class="crop-info">
+                  <h4>{{ rate.crop }}</h4>
+                  <span class="mandi-tag">{{ rate.mandi }}</span>
+                  <span class="merchant-name">{{ rate.merchantName }}</span>
+                </div>
+              </div>
+              <div class="rate-card-body">
+                <div class="grade-row">
+                  <span class="grade-label">{{ lang.t('rates.gradeA') }}</span>
+                  <span class="grade-price">{{ formatPrice(rate.gradeAMin, rate.gradeAMax) }}/kg</span>
+                </div>
+                <div class="grade-row">
+                  <span class="grade-label">{{ lang.t('rates.gradeB') }}</span>
+                  <span class="grade-price">{{ formatPrice(rate.gradeBMin, rate.gradeBMax) }}/kg</span>
+                </div>
+                <div class="grade-row">
+                  <span class="grade-label">{{ lang.t('rates.gradeC') }}</span>
+                  <span class="grade-price">{{ formatPrice(rate.gradeCMin, rate.gradeCMax) }}/kg</span>
+                </div>
+              </div>
+              <button class="order-btn" (click)="openOrderForm(rate)">{{ lang.t('farmerDashboard.placeOrder') }}</button>
+            </div>
+          }
+        </div>
+      }
+    } @else {
+      <!-- MY ORDERS -->
+      @if (activeOrders().length > 0) {
+        <h3 class="section-title">{{ lang.t('farmerDashboard.activeOrders') }}</h3>
+        <div class="orders-list">
+          @for (order of activeOrders(); track order.id) {
+            <div class="order-card">
+              <div class="order-header">
+                <div class="order-crop">
+                  <img [src]="ratesService.getCropImage(order.crop)" [alt]="order.crop" class="crop-img">
+                  <div>
+                    <h4>{{ order.crop }} - {{ lang.t('rates.grade' + order.grade) }}</h4>
+                    <span class="order-merchant">{{ lang.t('farmerDashboard.to') }} {{ order.merchantName }} ({{ order.mandi }})</span>
+                  </div>
+                </div>
+                <span class="status-badge" [class]="getStatusClass(order.status)">{{ getStatusLabel(order.status) }}</span>
+              </div>
+              <div class="order-details">
+                <div class="detail-row">
+                  <span>{{ lang.t('farmerDashboard.quantity') }}</span>
+                  <strong>{{ order.quantity }} kg</strong>
+                </div>
+                <div class="detail-row">
+                  <span>{{ lang.t('farmerDashboard.price') }}</span>
+                  <strong>{{ orderService.formatAmount(order.pricePerUnit) }}/kg</strong>
+                </div>
+                <div class="detail-row">
+                  <span>{{ lang.t('farmerDashboard.total') }}</span>
+                  <strong>{{ orderService.formatAmount(order.totalAmount) }}</strong>
+                </div>
+                <div class="detail-row">
+                  <span>{{ lang.t('farmerDashboard.commission') }}</span>
+                  <span class="commission">-{{ orderService.formatAmount(order.commission) }}</span>
+                </div>
+                <div class="detail-row net">
+                  <span>{{ lang.t('farmerDashboard.youGet') }}</span>
+                  <strong class="net-amount">{{ orderService.formatAmount(order.netAmount) }}</strong>
+                </div>
+              </div>
+              @if (order.transportPartner) {
+                <div class="logistics-info">
+                  <h5>{{ lang.t('farmerDashboard.logistics') }}</h5>
+                  <p>{{ order.transportPartner }} @if (order.vehicleNumber) { - {{ order.vehicleNumber }} }</p>
+                  @if (order.pickupDate) { <p>{{ lang.t('farmerDashboard.pickup') }}: {{ order.pickupDate }} @if (order.pickupTime) { {{ order.pickupTime }} }</p> }
+                  @if (order.estimatedDelivery) { <p>{{ lang.t('farmerDashboard.estDelivery') }}: {{ order.estimatedDelivery }}</p> }
+                </div>
+              }
+              @if (order.expectedPaymentDate) {
+                <div class="payment-info">
+                  <p>{{ lang.t('farmerDashboard.expectedPayment') }}: {{ order.expectedPaymentDate }}</p>
+                </div>
+              }
+              @if (order.status === 'requested') {
+                <button class="cancel-btn" (click)="cancelOrder(order)">{{ lang.t('farmerDashboard.cancelOrder') }}</button>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      @if (pastOrders().length > 0) {
+        <h3 class="section-title">{{ lang.t('farmerDashboard.pastOrders') }}</h3>
+        <div class="orders-list">
+          @for (order of pastOrders(); track order.id) {
+            <div class="order-card past">
+              <div class="order-header">
+                <div class="order-crop">
+                  <img [src]="ratesService.getCropImage(order.crop)" [alt]="order.crop" class="crop-img">
+                  <div>
+                    <h4>{{ order.crop }} - {{ lang.t('rates.grade' + order.grade) }}</h4>
+                    <span class="order-merchant">{{ order.merchantName }}</span>
+                  </div>
+                </div>
+                <span class="status-badge" [class]="getStatusClass(order.status)">{{ getStatusLabel(order.status) }}</span>
+              </div>
+              <div class="order-details compact">
+                <span>{{ order.quantity }} kg</span>
+                <span>{{ orderService.formatAmount(order.netAmount) }}</span>
+              </div>
+              @if (order.rejectionReason) {
+                <div class="rejection-reason">{{ lang.t('farmerDashboard.reason') }}: {{ order.rejectionReason }}</div>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      @if (orderService.farmerOrders().length === 0) {
+        <div class="empty-state">
+          <p>{{ lang.t('farmerDashboard.noOrders') }}</p>
+          <button class="browse-btn" (click)="activeTab.set('rates')">{{ lang.t('farmerDashboard.browseRates') }}</button>
+        </div>
+      }
+    }
+
+    <!-- ORDER FORM MODAL -->
+    @if (showOrderForm() && selectedRate()) {
+      <div class="modal-overlay" (click)="closeOrderForm()">
+        <div class="modal" (click)="$event.stopPropagation()">
+          <h3>{{ lang.t('farmerDashboard.placeOrder') }}</h3>
+          <div class="selected-crop">
+            <img [src]="ratesService.getCropImage(selectedRate()!.crop)" [alt]="selectedRate()!.crop" class="crop-img">
+            <div>
+              <h4>{{ selectedRate()!.crop }}</h4>
+              <span>{{ selectedRate()!.merchantName }} - {{ selectedRate()!.mandi }}</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>{{ lang.t('farmerDashboard.selectGrade') }}</label>
+            <div class="grade-options">
+              @for (g of ['A', 'B', 'C']; track g) {
+                <button type="button" class="grade-btn" [class.active]="orderGrade === g" (click)="orderGrade = $any(g)">
+                  {{ lang.t('rates.grade' + g) }}
+                  <span class="grade-price-sm">{{ formatPrice(getPrice(selectedRate()!, $any(g)).min, getPrice(selectedRate()!, $any(g)).max) }}</span>
+                </button>
+              }
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>{{ lang.t('farmerDashboard.quantity') }}</label>
+              <input type="number" [(ngModel)]="orderQuantity" min="1" />
+            </div>
+            <div class="form-group">
+              <label>{{ lang.t('farmerDashboard.unit') }}</label>
+              <select [(ngModel)]="orderUnit">
+                <option value="kg">kg</option>
+                <option value="ton">Ton (1000 kg)</option>
+                <option value="box">Box (~20 kg)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>{{ lang.t('farmerDashboard.notes') }}</label>
+            <textarea [(ngModel)]="orderNotes" rows="2" [placeholder]="lang.t('farmerDashboard.notesPlaceholder')"></textarea>
+          </div>
+
+          <div class="estimate-box">
+            <div class="estimate-row">
+              <span>{{ lang.t('farmerDashboard.estimatedTotal') }}</span>
+              <strong>{{ orderService.formatAmount(estimatedPrice) }}</strong>
+            </div>
+            <div class="estimate-row">
+              <span>{{ lang.t('farmerDashboard.platformFee') }} ({{ lang.t('rates.currency') }}{{ estimatedCommission.commissionRate }}/kg)</span>
+              <span>-{{ orderService.formatAmount(estimatedCommission.commission) }}</span>
+            </div>
+            <div class="estimate-row net">
+              <span>{{ lang.t('farmerDashboard.youGet') }}</span>
+              <strong>{{ orderService.formatAmount(estimatedPrice - estimatedCommission.commission) }}</strong>
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            @if (orderError()) {
+              <p class="error-msg">{{ orderError() }}</p>
+            }
+            <button class="cancel-modal-btn" (click)="closeOrderForm()">{{ lang.t('rateForm.cancel') }}</button>
+            <button class="confirm-btn" [disabled]="submittingOrder()" (click)="submitOrder()">
+              @if (submittingOrder()) { {{ lang.t('login.pleaseWait') }} } @else { {{ lang.t('farmerDashboard.confirmOrder') }} }
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- CONFIRM DIALOG -->
+    @if (showConfirmDialog()) {
+      <div class="modal-overlay" (click)="closeConfirmDialog()">
+        <div class="modal confirm-modal" (click)="$event.stopPropagation()">
+          <h3>{{ confirmDialogTitle() }}</h3>
+          <p class="confirm-message">{{ confirmDialogMessage() }}</p>
+          <div class="modal-actions">
+            <button class="cancel-modal-btn" (click)="closeConfirmDialog()">Cancel</button>
+            <button class="confirm-btn danger-btn" (click)="executeConfirm()">Confirm</button>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

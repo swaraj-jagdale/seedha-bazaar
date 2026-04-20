@@ -1,0 +1,24 @@
+<section class="hero">
+  <div class="hero-container">
+    <div class="hero-content">
+      <h1>
+        <span class="line1">{{ lang.t('hero.title1') }}</span>
+        <span class="line2">{{ lang.t('hero.title2') }}</span>
+      </h1>
+      <p class="hero-desc">{{ lang.t('hero.desc') }}</p>
+      <div class="location-badge">
+        <img src="assets/images/location-pin.svg" alt="Location" width="16" height="16">
+        <span>{{ lang.t('hero.location') }}</span>
+      </div>
+      <div class="hero-ctas">
+        <a routerLink="/farmer/login" class="cta-farmer">{{ lang.t('hero.farmerCta') }}</a>
+        <a routerLink="/merchant/login" class="cta-merchant">{{ lang.t('hero.merchantCta') }}</a>
+      </div>
+    </div>
+    <div class="hero-image">
+      <div class="farmer-illustration">
+        <img src="assets/images/hero-farmer.jpg" alt="Indian farmer with fresh produce" class="hero-img">
+      </div>
+    </div>
+  </div>
+</section>

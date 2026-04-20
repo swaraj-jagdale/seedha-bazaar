@@ -1,0 +1,160 @@
+.hero {
+  background: linear-gradient(135deg, #e8f0e0 0%, #d4e4c8 50%, #c8dbb8 100%);
+  padding: 50px 20px;
+  overflow: hidden;
+}
+
+.hero-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.hero-content {
+  flex: 1;
+
+  h1 {
+    font-size: 2.2rem;
+    color: #3a5a2c;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 15px;
+
+    .line1, .line2 {
+      display: block;
+    }
+  }
+
+  .hero-desc {
+    font-size: 1rem;
+    color: #444;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    white-space: pre-line;
+  }
+}
+
+.location-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.6);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  color: #3a5a2c;
+  font-weight: 500;
+}
+
+.hero-ctas {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.cta-farmer {
+  padding: 12px 28px;
+  background: #e67e22;
+  color: #fff;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: background 0.3s;
+
+  &:hover {
+    background: #d35400;
+  }
+}
+
+.cta-merchant {
+  padding: 12px 28px;
+  background: #fff;
+  color: #3a5a2c;
+  border: 2px solid #3a5a2c;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: all 0.3s;
+
+  &:hover {
+    background: #3a5a2c;
+    color: #fff;
+  }
+}
+
+.hero-image {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.farmer-illustration {
+  width: 100%;
+  max-width: 450px;
+
+  .hero-img {
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+    object-fit: cover;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    padding: 30px 16px;
+  }
+
+  .hero-container {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .hero-content {
+    h1 {
+      font-size: 1.6rem;
+    }
+
+    .hero-desc {
+      font-size: 0.9rem;
+    }
+  }
+
+  .location-badge {
+    justify-content: center;
+  }
+
+  .hero-ctas {
+    justify-content: center;
+    flex-wrap: wrap;
+
+    a {
+      flex: 1;
+      min-width: 140px;
+      text-align: center;
+      padding: 12px 16px;
+    }
+  }
+
+  .hero-image {
+    max-width: 300px;
+  }
+}
+
+@media (max-width: 360px) {
+  .hero-content h1 {
+    font-size: 1.4rem;
+  }
+
+  .hero-ctas {
+    flex-direction: column;
+
+    a {
+      width: 100%;
+    }
+  }
+}

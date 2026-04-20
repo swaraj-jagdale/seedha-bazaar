@@ -1,0 +1,306 @@
+<div class="dashboard">
+  <div class="dashboard-container">
+    <div class="dashboard-header">
+      <div class="welcome">
+        <h2>{{ lang.t('dashboard.title') }}</h2>
+        <p>{{ lang.t('dashboard.welcome') }}, <strong>{{ authService.currentUser()?.displayName || 'Merchant' }}</strong></p>
+      </div>
+      <div class="dashboard-actions">
+        <button class="tab-btn" [class.active]="activeTab() === 'rates'" (click)="activeTab.set('rates')">
+          {{ lang.t('dashboard.yourRates') }}
+        </button>
+        <button class="tab-btn" [class.active]="activeTab() === 'orders'" (click)="activeTab.set('orders')">
+          {{ lang.t('merchantDashboard.orders') }}
+          @if (pendingOrders().length > 0) {
+            <span class="badge">{{ pendingOrders().length }}</span>
+          }
+        </button>
+        <button class="logout-btn" (click)="logout()">{{ lang.t('dashboard.logout') }}</button>
+      </div>
+    </div>
+
+    @if (activeTab() === 'rates') {
+      <!-- RATES TAB -->
+      <div class="rates-header">
+        <button class="add-btn" (click)="openAddForm()">{{ lang.t('dashboard.addRate') }}</button>
+      </div>
+
+      @if (showForm()) {
+        <app-rate-form
+          [editRate]="editingRate()"
+          (saved)="closeForm()"
+          (cancelled)="closeForm()"
+        ></app-rate-form>
+      }
+
+      <div class="rates-section">
+        @if (ratesService.merchantRates().length === 0) {
+          <div class="empty-state">
+            <p>{{ lang.t('dashboard.emptyState1') }}</p>
+            <p>{{ lang.t('dashboard.emptyState2') }}</p>
+          </div>
+        } @else {
+          <div class="rates-grid">
+            @for (rate of ratesService.merchantRates(); track rate.id) {
+              <div class="rate-card">
+                <div class="rate-card-img">
+                  <img [src]="ratesService.getCropImage(rate.crop)" [alt]="rate.crop" class="crop-img">
+                  <div class="card-actions">
+                    <button class="edit-btn" (click)="openEditForm(rate)" title="Edit">
+                      <img src="assets/images/edit-icon.svg" alt="Edit" width="16" height="16">
+                    </button>
+                    <button class="delete-btn" (click)="deleteRate(rate)" title="Delete">
+                      <img src="assets/images/delete-icon.svg" alt="Delete" width="16" height="16">
+                    </button>
+                  </div>
+                </div>
+                <div class="rate-card-header">
+                  <div class="crop-info">
+                    <h4>{{ rate.crop }}</h4>
+                    <span class="mandi-tag">{{ rate.mandi }}</span>
+                  </div>
+                </div>
+                <div class="rate-card-body">
+                  <div class="grade-row">
+                    <span class="grade-label">{{ lang.t('rates.gradeA') }}</span>
+                    <span class="grade-price">{{ formatPrice(rate.gradeAMin, rate.gradeAMax) }}/kg</span>
+                  </div>
+                  <div class="grade-row">
+                    <span class="grade-label">{{ lang.t('rates.gradeB') }}</span>
+                    <span class="grade-price">{{ formatPrice(rate.gradeBMin, rate.gradeBMax) }}/kg</span>
+                  </div>
+                  <div class="grade-row">
+                    <span class="grade-label">{{ lang.t('rates.gradeC') }}</span>
+                    <span class="grade-price">{{ formatPrice(rate.gradeCMin, rate.gradeCMax) }}/kg</span>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    } @else {
+      <!-- ORDERS TAB -->
+
+      <!-- Pending Orders -->
+      @if (pendingOrders().length > 0) {
+        <h3 class="section-title pending-title">{{ lang.t('merchantDashboard.pendingOrders') }} ({{ pendingOrders().length }})</h3>
+        <div class="orders-list">
+          @for (order of pendingOrders(); track order.id) {
+            <div class="order-card pending">
+              <div class="order-header">
+                <div class="order-crop">
+                  <img [src]="ratesService.getCropImage(order.crop)" [alt]="order.crop" class="crop-img">
+                  <div>
+                    <h4>{{ order.crop }} - {{ lang.t('rates.grade' + order.grade) }}</h4>
+                    <span class="order-farmer">{{ lang.t('merchantDashboard.from') }} {{ order.farmerName }} ({{ order.farmerVillage }}, {{ order.farmerDistrict }})</span>
+                  </div>
+                </div>
+              </div>
+              <div class="order-details">
+                <div class="detail-row">
+                  <span>{{ lang.t('farmerDashboard.quantity') }}</span>
+                  <strong>{{ order.quantity }} kg</strong>
+                </div>
+                <div class="detail-row">
+                  <span>{{ lang.t('farmerDashboard.price') }}</span>
+                  <strong>{{ orderService.formatAmount(order.pricePerUnit) }}/kg</strong>
+                </div>
+                <div class="detail-row">
+                  <span>{{ lang.t('farmerDashboard.total') }}</span>
+                  <strong>{{ orderService.formatAmount(order.totalAmount) }}</strong>
+                </div>
+                <div class="detail-row">
+                  <span>{{ lang.t('merchantDashboard.yourCommission') }}</span>
+                  <strong class="commission-earn">+{{ orderService.formatAmount(order.commission) }}</strong>
+                </div>
+              </div>
+              @if (order.farmerNotes) {
+                <div class="farmer-notes">{{ lang.t('farmerDashboard.notes') }}: {{ order.farmerNotes }}</div>
+              }
+              <div class="order-actions">
+                <button class="accept-btn" (click)="acceptOrder(order)">{{ lang.t('merchantDashboard.accept') }}</button>
+                <button class="reject-btn" (click)="rejectOrder(order)">{{ lang.t('merchantDashboard.reject') }}</button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Active Orders -->
+      @if (activeOrders().length > 0) {
+        <h3 class="section-title">{{ lang.t('merchantDashboard.activeOrders') }} ({{ activeOrders().length }})</h3>
+        <div class="orders-list">
+          @for (order of activeOrders(); track order.id) {
+            <div class="order-card">
+              <div class="order-header">
+                <div class="order-crop">
+                  <img [src]="ratesService.getCropImage(order.crop)" [alt]="order.crop" class="crop-img">
+                  <div>
+                    <h4>{{ order.crop }} - {{ lang.t('rates.grade' + order.grade) }}</h4>
+                    <span class="order-farmer">{{ order.farmerName }} | {{ order.quantity }} kg | {{ orderService.formatAmount(order.totalAmount) }}</span>
+                  </div>
+                </div>
+                <span class="status-badge" [class]="getStatusClass(order.status)">{{ getStatusLabel(order.status) }}</span>
+              </div>
+
+              <app-order-tracking [order]="order" />
+
+              <div class="order-management">
+                @if (orderService.getNextStatus(order.status)) {
+                  <button class="advance-btn" (click)="advanceStatus(order)">
+                    {{ lang.t('merchantDashboard.moveTo') }} {{ getStatusLabel(orderService.getNextStatus(order.status)!) }}
+                  </button>
+                }
+                <button class="logistics-btn" (click)="openLogisticsModal(order)">{{ lang.t('merchantDashboard.logistics') }}</button>
+                @if (order.status === 'payment_pending' || order.status === 'delivered') {
+                  <button class="payment-btn" (click)="openPaymentModal(order)">{{ lang.t('merchantDashboard.recordPayment') }}</button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Completed Orders -->
+      @if (completedOrders().length > 0) {
+        <h3 class="section-title">{{ lang.t('merchantDashboard.completedOrders') }}</h3>
+        <div class="orders-list">
+          @for (order of completedOrders(); track order.id) {
+            <div class="order-card past">
+              <div class="order-header">
+                <div class="order-crop">
+                  <img [src]="ratesService.getCropImage(order.crop)" [alt]="order.crop" class="crop-img">
+                  <div>
+                    <h4>{{ order.crop }} - {{ order.farmerName }}</h4>
+                    <span class="order-farmer">{{ order.quantity }} kg | {{ orderService.formatAmount(order.totalAmount) }}</span>
+                  </div>
+                </div>
+                <span class="status-badge" [class]="getStatusClass(order.status)">{{ getStatusLabel(order.status) }}</span>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      @if (orderService.merchantOrders().length === 0) {
+        <div class="empty-state">
+          <p>{{ lang.t('merchantDashboard.noOrders') }}</p>
+        </div>
+      }
+    }
+
+    <!-- LOGISTICS MODAL -->
+    @if (showLogisticsModal()) {
+      <div class="modal-overlay" (click)="showLogisticsModal.set(false)">
+        <div class="modal" (click)="$event.stopPropagation()">
+          <h3>{{ lang.t('merchantDashboard.logistics') }}</h3>
+          <div class="form-group">
+            <label>{{ lang.t('merchantDashboard.transportPartner') }}</label>
+            <input type="text" [(ngModel)]="transportPartner" placeholder="e.g. ABC Transport" />
+          </div>
+          <div class="form-group">
+            <label>{{ lang.t('merchantDashboard.vehicleNumber') }}</label>
+            <input type="text" [(ngModel)]="vehicleNumber" placeholder="e.g. MH-12-AB-1234" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>{{ lang.t('merchantDashboard.pickupDate') }}</label>
+              <input type="date" [(ngModel)]="pickupDate" />
+            </div>
+            <div class="form-group">
+              <label>{{ lang.t('merchantDashboard.pickupTime') }}</label>
+              <input type="time" [(ngModel)]="pickupTime" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>{{ lang.t('merchantDashboard.estDelivery') }}</label>
+            <input type="date" [(ngModel)]="estimatedDelivery" />
+          </div>
+          <div class="modal-actions">
+            <button class="cancel-modal-btn" (click)="showLogisticsModal.set(false)">{{ lang.t('rateForm.cancel') }}</button>
+            <button class="confirm-btn" (click)="saveLogistics()">{{ lang.t('rateForm.save') }}</button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- PAYMENT MODAL -->
+    @if (showPaymentModal()) {
+      <div class="modal-overlay" (click)="showPaymentModal.set(false)">
+        <div class="modal" (click)="$event.stopPropagation()">
+          <h3>{{ lang.t('merchantDashboard.recordPayment') }}</h3>
+          <div class="form-group">
+            <label>{{ lang.t('merchantDashboard.paymentMethod') }}</label>
+            <select [(ngModel)]="paymentMethod">
+              <option value="">{{ lang.t('merchantDashboard.selectMethod') }}</option>
+              <option value="Bank Transfer">Bank Transfer</option>
+              <option value="UPI">UPI</option>
+              <option value="Cash">Cash</option>
+              <option value="Cheque">Cheque</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>{{ lang.t('merchantDashboard.paymentRef') }}</label>
+            <input type="text" [(ngModel)]="paymentReference" placeholder="Transaction ID / Cheque No." />
+          </div>
+          <div class="form-group">
+            <label>{{ lang.t('merchantDashboard.paymentDate') }}</label>
+            <input type="date" [(ngModel)]="paymentDate" />
+          </div>
+          @if (selectedOrder()) {
+            <div class="payment-summary">
+              <div class="detail-row">
+                <span>{{ lang.t('farmerDashboard.total') }}</span>
+                <strong>{{ orderService.formatAmount(selectedOrder()!.totalAmount) }}</strong>
+              </div>
+              <div class="detail-row">
+                <span>{{ lang.t('farmerDashboard.commission') }}</span>
+                <span>-{{ orderService.formatAmount(selectedOrder()!.commission) }}</span>
+              </div>
+              <div class="detail-row net">
+                <span>{{ lang.t('merchantDashboard.payToFarmer') }}</span>
+                <strong>{{ orderService.formatAmount(selectedOrder()!.netAmount) }}</strong>
+              </div>
+            </div>
+          }
+          <div class="modal-actions">
+            <button class="cancel-modal-btn" (click)="showPaymentModal.set(false)">{{ lang.t('rateForm.cancel') }}</button>
+            <button class="confirm-btn" (click)="savePayment()">{{ lang.t('merchantDashboard.confirmPayment') }}</button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- CONFIRM DIALOG -->
+    @if (showConfirmDialog()) {
+      <div class="modal-overlay" (click)="closeConfirmDialog()">
+        <div class="modal confirm-modal" (click)="$event.stopPropagation()">
+          <h3>{{ confirmDialogTitle() }}</h3>
+          <p class="confirm-message">{{ confirmDialogMessage() }}</p>
+          <div class="modal-actions">
+            <button class="cancel-modal-btn" (click)="closeConfirmDialog()">Cancel</button>
+            <button class="confirm-btn danger-btn" (click)="executeConfirm()">Confirm</button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- REJECT DIALOG -->
+    @if (showRejectDialog()) {
+      <div class="modal-overlay" (click)="showRejectDialog.set(false)">
+        <div class="modal" (click)="$event.stopPropagation()">
+          <h3>{{ lang.t('merchantDashboard.reject') }}</h3>
+          <div class="form-group">
+            <label>{{ lang.t('merchantDashboard.rejectReason') }}</label>
+            <textarea class="reject-textarea" [(ngModel)]="rejectReason" rows="3" placeholder="Enter reason for rejection..."></textarea>
+          </div>
+          <div class="modal-actions">
+            <button class="cancel-modal-btn" (click)="showRejectDialog.set(false)">Cancel</button>
+            <button class="confirm-btn danger-btn" (click)="confirmReject()">Reject Order</button>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

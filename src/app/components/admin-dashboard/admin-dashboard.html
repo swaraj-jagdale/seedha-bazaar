@@ -1,0 +1,157 @@
+<div class="admin-page">
+  <div class="admin-header">
+    <div class="admin-title">
+      <img src="assets/images/logo.svg" alt="Logo" width="32" height="32">
+      <h1>Admin Panel</h1>
+    </div>
+    <button class="logout-btn" (click)="logout()">Logout</button>
+  </div>
+
+  <div class="admin-tabs">
+    <button [class.active]="activeTab() === 'rates'" (click)="setTab('rates')">Rates ({{ adminService.allRates().length }})</button>
+    <button [class.active]="activeTab() === 'orders'" (click)="setTab('orders')">Orders ({{ adminService.allOrders().length }})</button>
+    <button [class.active]="activeTab() === 'users'" (click)="setTab('users')">Users ({{ adminService.allUsers().length }})</button>
+  </div>
+
+  <div class="admin-search">
+    <input type="text" placeholder="Search..." [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)" />
+  </div>
+
+  <div class="admin-content">
+    <!-- RATES TAB -->
+    @if (activeTab() === 'rates') {
+      <div class="data-list">
+        @for (rate of filteredRates(); track rate.id) {
+          <div class="data-card">
+            <div class="card-row">
+              <img [src]="ratesService.getCropImage(rate.crop)" [alt]="rate.crop" class="crop-img">
+              <div class="card-info">
+                <h3>{{ rate.crop }}</h3>
+                <span class="meta">{{ rate.merchantName }} &middot; {{ rate.mandi }}</span>
+              </div>
+              <div class="card-actions">
+                <button class="edit-btn" (click)="startEditRate(rate)">Edit</button>
+                <button class="delete-btn" (click)="deleteRate(rate)">Delete</button>
+              </div>
+            </div>
+
+            @if (editingRate()?.id !== rate.id) {
+              <div class="grade-grid">
+                <div class="grade-item">
+                  <span class="grade-label">Grade A</span>
+                  <span class="grade-price">{{ formatPrice(rate.gradeAMin, rate.gradeAMax) }}</span>
+                </div>
+                <div class="grade-item">
+                  <span class="grade-label">Grade B</span>
+                  <span class="grade-price">{{ formatPrice(rate.gradeBMin, rate.gradeBMax) }}</span>
+                </div>
+                <div class="grade-item">
+                  <span class="grade-label">Grade C</span>
+                  <span class="grade-price">{{ formatPrice(rate.gradeCMin, rate.gradeCMax) }}</span>
+                </div>
+              </div>
+            }
+
+            @if (editingRate()?.id === rate.id) {
+              <div class="edit-form">
+                <div class="price-row">
+                  <label>Grade A</label>
+                  <input type="number" [(ngModel)]="editForm.gradeAMin" placeholder="Min" />
+                  <span>-</span>
+                  <input type="number" [(ngModel)]="editForm.gradeAMax" placeholder="Max" />
+                </div>
+                <div class="price-row">
+                  <label>Grade B</label>
+                  <input type="number" [(ngModel)]="editForm.gradeBMin" placeholder="Min" />
+                  <span>-</span>
+                  <input type="number" [(ngModel)]="editForm.gradeBMax" placeholder="Max" />
+                </div>
+                <div class="price-row">
+                  <label>Grade C</label>
+                  <input type="number" [(ngModel)]="editForm.gradeCMin" placeholder="Min" />
+                  <span>-</span>
+                  <input type="number" [(ngModel)]="editForm.gradeCMax" placeholder="Max" />
+                </div>
+                <div class="edit-actions">
+                  <button class="save-btn" (click)="saveRate()">Save</button>
+                  <button class="cancel-btn" (click)="cancelEditRate()">Cancel</button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+        @if (filteredRates().length === 0) {
+          <p class="empty-state">No rates found.</p>
+        }
+      </div>
+    }
+
+    <!-- ORDERS TAB -->
+    @if (activeTab() === 'orders') {
+      <div class="data-list">
+        @for (order of filteredOrders(); track order.id) {
+          <div class="data-card">
+            <div class="card-row">
+              <img [src]="ratesService.getCropImage(order.crop)" [alt]="order.crop" class="crop-img">
+              <div class="card-info">
+                <h3>{{ order.crop }} - Grade {{ order.grade }}</h3>
+                <span class="meta">{{ order.farmerName }} &rarr; {{ order.merchantName }}</span>
+                <span class="meta">{{ order.quantity }} {{ order.unit }} &middot; {{ order.mandi }}</span>
+              </div>
+              <div class="card-status">
+                <span class="status-badge" [class]="getStatusClass(order.status)">{{ order.status }}</span>
+                <button class="edit-btn" (click)="startUpdateOrder(order.id!, order.status)">Update</button>
+              </div>
+            </div>
+
+            @if (updatingOrderId() === order.id) {
+              <div class="edit-form">
+                <div class="status-row">
+                  <label>New Status</label>
+                  <select [(ngModel)]="newStatus">
+                    @for (s of statusOptions; track s) {
+                      <option [value]="s">{{ s }}</option>
+                    }
+                  </select>
+                </div>
+                <div class="status-row">
+                  <label>Note (optional)</label>
+                  <input type="text" [(ngModel)]="statusNote" placeholder="Status update note" />
+                </div>
+                <div class="edit-actions">
+                  <button class="save-btn" (click)="saveOrderStatus()">Save</button>
+                  <button class="cancel-btn" (click)="cancelUpdateOrder()">Cancel</button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+        @if (filteredOrders().length === 0) {
+          <p class="empty-state">No orders found.</p>
+        }
+      </div>
+    }
+
+    <!-- USERS TAB -->
+    @if (activeTab() === 'users') {
+      <div class="data-list">
+        @for (user of filteredUsers(); track user.uid) {
+          <div class="data-card">
+            <div class="card-row">
+              <div class="user-avatar">{{ user.profile.displayName.charAt(0).toUpperCase() }}</div>
+              <div class="card-info">
+                <h3>{{ user.profile.displayName }}</h3>
+                <span class="meta">{{ user.profile.email }} &middot; {{ user.profile.phone }}</span>
+                <span class="meta">{{ user.role === 'merchant' ? 'Merchant' : 'Farmer' }}</span>
+              </div>
+              <span class="role-badge" [class]="user.role">{{ user.role }}</span>
+            </div>
+          </div>
+        }
+        @if (filteredUsers().length === 0) {
+          <p class="empty-state">No users found.</p>
+        }
+      </div>
+    }
+  </div>
+</div>

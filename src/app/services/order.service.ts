@@ -1,0 +1,273 @@
+import { Injectable, signal } from '@angular/core';
+import { db } from '../firebase.config';
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  doc,
+  query,
+  where,
+  orderBy,
+  onSnapshot,
+  serverTimestamp,
+  Timestamp,
+  getDoc,
+} from 'firebase/firestore';
+
+export type OrderStatus =
+  | 'requested'
+  | 'accepted'
+  | 'sorting'
+  | 'packed'
+  | 'in_transit'
+  | 'delivered'
+  | 'payment_pending'
+  | 'paid'
+  | 'rejected'
+  | 'cancelled';
+
+export interface Order {
+  id?: string;
+  farmerId: string;
+  farmerName: string;
+  farmerPhone: string;
+  farmerVillage: string;
+  farmerDistrict: string;
+  merchantId: string;
+  merchantName: string;
+  merchantPhone: string;
+  crop: string;
+  emoji: string;
+  mandi: string;
+  grade: 'A' | 'B' | 'C';
+  quantity: number;
+  unit: 'kg' | 'ton' | 'box';
+  pricePerUnit: number;
+  totalAmount: number;
+  commission: number;
+  commissionRate: number;
+  netAmount: number;
+  status: OrderStatus;
+  statusHistory: StatusEntry[];
+  // Logistics
+  transportPartner?: string;
+  vehicleNumber?: string;
+  pickupDate?: string;
+  pickupTime?: string;
+  estimatedDelivery?: string;
+  // Payment
+  paymentMethod?: string;
+  paymentDate?: string;
+  paymentReference?: string;
+  expectedPaymentDate?: string;
+  // Notes
+  farmerNotes?: string;
+  merchantNotes?: string;
+  rejectionReason?: string;
+  createdAt?: Timestamp;
+  updatedAt?: Timestamp;
+}
+
+export interface StatusEntry {
+  status: OrderStatus;
+  timestamp: string;
+  note?: string;
+}
+
+const STATUS_FLOW: OrderStatus[] = [
+  'requested',
+  'accepted',
+  'sorting',
+  'packed',
+  'in_transit',
+  'delivered',
+  'payment_pending',
+  'paid',
+];
+
+@Injectable({ providedIn: 'root' })
+export class OrderService {
+  private ordersCollection = collection(db, 'orders');
+
+  farmerOrders = signal<Order[]>([]);
+  merchantOrders = signal<Order[]>([]);
+
+  readonly STATUS_FLOW = STATUS_FLOW;
+
+  listenToFarmerOrders(farmerId: string) {
+    const q = query(
+      this.ordersCollection,
+      where('farmerId', '==', farmerId),
+      orderBy('createdAt', 'desc')
+    );
+
+    return onSnapshot(
+      q,
+      (snapshot) => {
+        const orders: Order[] = [];
+        snapshot.forEach((d) => {
+          orders.push({ id: d.id, ...d.data() } as Order);
+        });
+        this.farmerOrders.set(orders);
+      },
+      (error) => {
+        console.error('Error listening to farmer orders:', error.message);
+        if (error.code === 'failed-precondition') {
+          const fallbackQ = query(this.ordersCollection, where('farmerId', '==', farmerId));
+          onSnapshot(fallbackQ, (snapshot) => {
+            const orders: Order[] = [];
+            snapshot.forEach((d) => {
+              orders.push({ id: d.id, ...d.data() } as Order);
+            });
+            this.farmerOrders.set(orders);
+          });
+        }
+      }
+    );
+  }
+
+  listenToMerchantOrders(merchantId: string) {
+    const q = query(
+      this.ordersCollection,
+      where('merchantId', '==', merchantId),
+      orderBy('createdAt', 'desc')
+    );
+
+    return onSnapshot(
+      q,
+      (snapshot) => {
+        const orders: Order[] = [];
+        snapshot.forEach((d) => {
+          orders.push({ id: d.id, ...d.data() } as Order);
+        });
+        this.merchantOrders.set(orders);
+      },
+      (error) => {
+        console.error('Error listening to merchant orders:', error.message);
+        if (error.code === 'failed-precondition') {
+          const fallbackQ = query(this.ordersCollection, where('merchantId', '==', merchantId));
+          onSnapshot(fallbackQ, (snapshot) => {
+            const orders: Order[] = [];
+            snapshot.forEach((d) => {
+              orders.push({ id: d.id, ...d.data() } as Order);
+            });
+            this.merchantOrders.set(orders);
+          });
+        }
+      }
+    );
+  }
+
+  async createOrder(order: Omit<Order, 'id' | 'createdAt' | 'updatedAt' | 'statusHistory'>) {
+    const now = new Date().toISOString();
+    return addDoc(this.ordersCollection, {
+      ...order,
+      status: 'requested',
+      statusHistory: [{ status: 'requested', timestamp: now }],
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+  }
+
+  async updateOrderStatus(orderId: string, newStatus: OrderStatus, note?: string) {
+    const docRef = doc(db, 'orders', orderId);
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) return;
+
+    const current = docSnap.data() as Order;
+    const now = new Date().toISOString();
+    const entry: StatusEntry = { status: newStatus, timestamp: now };
+    if (note) entry.note = note;
+
+    const updates: Record<string, unknown> = {
+      status: newStatus,
+      statusHistory: [...(current.statusHistory || []), entry],
+      updatedAt: serverTimestamp(),
+    };
+
+    // Auto-set expected payment date when delivered
+    if (newStatus === 'delivered' && !current.expectedPaymentDate) {
+      const payDate = new Date();
+      payDate.setDate(payDate.getDate() + 5);
+      updates['expectedPaymentDate'] = payDate.toISOString().split('T')[0];
+    }
+
+    return updateDoc(docRef, updates);
+  }
+
+  async acceptOrder(orderId: string, note?: string) {
+    return this.updateOrderStatus(orderId, 'accepted', note);
+  }
+
+  async rejectOrder(orderId: string, reason: string) {
+    const docRef = doc(db, 'orders', orderId);
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) return;
+
+    const current = docSnap.data() as Order;
+    const now = new Date().toISOString();
+
+    return updateDoc(docRef, {
+      status: 'rejected',
+      rejectionReason: reason,
+      statusHistory: [...(current.statusHistory || []), { status: 'rejected', timestamp: now, note: reason }],
+      updatedAt: serverTimestamp(),
+    });
+  }
+
+  async cancelOrder(orderId: string) {
+    return this.updateOrderStatus(orderId, 'cancelled', 'Cancelled by farmer');
+  }
+
+  async updateLogistics(orderId: string, logistics: { transportPartner?: string; vehicleNumber?: string; pickupDate?: string; pickupTime?: string; estimatedDelivery?: string }) {
+    const docRef = doc(db, 'orders', orderId);
+    return updateDoc(docRef, {
+      ...logistics,
+      updatedAt: serverTimestamp(),
+    });
+  }
+
+  async markPayment(orderId: string, payment: { paymentMethod: string; paymentReference: string; paymentDate: string }) {
+    const docRef = doc(db, 'orders', orderId);
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) return;
+
+    const current = docSnap.data() as Order;
+    const now = new Date().toISOString();
+
+    return updateDoc(docRef, {
+      ...payment,
+      status: 'paid',
+      statusHistory: [...(current.statusHistory || []), { status: 'paid', timestamp: now, note: `Paid via ${payment.paymentMethod}` }],
+      updatedAt: serverTimestamp(),
+    });
+  }
+
+  getNextStatus(currentStatus: OrderStatus): OrderStatus | null {
+    const idx = STATUS_FLOW.indexOf(currentStatus);
+    if (idx === -1 || idx >= STATUS_FLOW.length - 1) return null;
+    return STATUS_FLOW[idx + 1];
+  }
+
+  calculateCommission(pricePerUnit: number, quantity: number, crop: string): { commission: number; commissionRate: number } {
+    // Commission rates per kg based on crop type (from proposal: Rs 3-8/kg)
+    const rates: Record<string, number> = {
+      'Broccoli': 4,
+      'Grapes': 5,
+      'Muskmelon': 3,
+      'Apple Ber': 3,
+      'Onion': 3,
+      'Tomato': 3,
+      'Potato': 3,
+      'Cauliflower': 3,
+      'Green Chilli': 4,
+    };
+    const commissionRate = rates[crop] || 4;
+    const commission = commissionRate * quantity;
+    return { commission, commissionRate };
+  }
+
+  formatAmount(amount: number): string {
+    return `₹${amount.toLocaleString('en-IN')}`;
+  }
+}

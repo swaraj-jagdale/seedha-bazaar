@@ -1,0 +1,37 @@
+<div class="tracking">
+  @if (order().status === 'rejected') {
+    <div class="tracking-rejected">
+      <span class="rejected-icon">✕</span>
+      <p>{{ lang.t('order.status.rejected') }}</p>
+      @if (order().rejectionReason) {
+        <span class="rejected-reason">{{ order().rejectionReason }}</span>
+      }
+    </div>
+  } @else if (order().status === 'cancelled') {
+    <div class="tracking-cancelled">
+      <span class="cancelled-icon">✕</span>
+      <p>{{ lang.t('order.status.cancelled') }}</p>
+    </div>
+  } @else {
+    <div class="tracking-pipeline">
+      @for (step of steps; track step; let i = $index) {
+        <div class="tracking-step" [class.completed]="isStepCompleted(step)" [class.active]="isStepActive(step)">
+          <div class="step-dot">
+            @if (isStepCompleted(step) && !isStepActive(step)) {
+              <img src="assets/images/checkmark.svg" alt="Completed" width="14" height="14">
+            } @else {
+              <span class="step-number">{{ i + 1 }}</span>
+            }
+          </div>
+          @if (i < steps.length - 1) {
+            <div class="step-line" [class.filled]="isStepCompleted(steps[i + 1])"></div>
+          }
+          <div class="step-label">{{ lang.t('order.status.' + step) }}</div>
+          @if (getTimestamp(step)) {
+            <div class="step-time">{{ getTimestamp(step) }}</div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>
