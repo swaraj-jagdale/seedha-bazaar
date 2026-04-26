@@ -8,7 +8,7 @@
       </p>
       <div class="mandi-select">
         <select (change)="onMandiChange($event)">
-          @for (mandi of mandis; track mandi) {
+          @for (mandi of mandis(); track mandi) {
             <option [value]="mandi">{{ mandi }}</option>
           }
         </select>

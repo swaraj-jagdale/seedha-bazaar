@@ -27,6 +27,12 @@ export class AdminDashboard implements OnDestroy {
   testimonialsForm: any[] = [];
   editingFAQs = signal(false);
   faqsForm: any[] = [];
+  editingDefaultMandi = signal(false);
+  defaultMandiForm = '';
+  editingMandiList = signal(false);
+  mandiListForm: string[] = [];
+  editingStats = signal(false);
+  statsForm: any[] = [];
 
   // Rate editing
   editingRate = signal<CropRate | null>(null);
@@ -106,6 +112,9 @@ export class AdminDashboard implements OnDestroy {
     this.phoneNumberForm = this.appSettingsService.getPhoneNumber();
     this.testimonialsForm = JSON.parse(JSON.stringify(this.appSettingsService.getTestimonials()));
     this.faqsForm = JSON.parse(JSON.stringify(this.appSettingsService.getFAQs()));
+    this.defaultMandiForm = this.appSettingsService.getDefaultMandi();
+    this.mandiListForm = [...this.appSettingsService.getMandiList()];
+    this.statsForm = JSON.parse(JSON.stringify(this.appSettingsService.getStats()));
   }
 
   ngOnDestroy() {
@@ -455,5 +464,80 @@ export class AdminDashboard implements OnDestroy {
 
   get currentFAQs(): any[] {
     return this.appSettingsService.getFAQs();
+  }
+
+  // Mandi settings editing
+  startEditDefaultMandi() {
+    this.editingDefaultMandi.set(true);
+    this.defaultMandiForm = this.appSettingsService.getDefaultMandi();
+  }
+
+  cancelEditDefaultMandi() {
+    this.editingDefaultMandi.set(false);
+    this.defaultMandiForm = this.appSettingsService.getDefaultMandi();
+  }
+
+  async saveDefaultMandi() {
+    await this.appSettingsService.updateDefaultMandi(this.defaultMandiForm);
+    this.editingDefaultMandi.set(false);
+  }
+
+  startEditMandiList() {
+    this.editingMandiList.set(true);
+    this.mandiListForm = [...this.appSettingsService.getMandiList()];
+  }
+
+  cancelEditMandiList() {
+    this.editingMandiList.set(false);
+    this.mandiListForm = [...this.appSettingsService.getMandiList()];
+  }
+
+  async saveMandiList() {
+    await this.appSettingsService.updateMandiList(this.mandiListForm);
+    this.editingMandiList.set(false);
+  }
+
+  addMandi() {
+    this.mandiListForm.push('');
+  }
+
+  removeMandi(index: number) {
+    this.mandiListForm.splice(index, 1);
+  }
+
+  get currentDefaultMandi(): string {
+    return this.appSettingsService.getDefaultMandi();
+  }
+
+  get currentMandiList(): string[] {
+    return this.appSettingsService.getMandiList();
+  }
+
+  // Stats editing
+  startEditStats() {
+    this.editingStats.set(true);
+    this.statsForm = JSON.parse(JSON.stringify(this.appSettingsService.getStats()));
+  }
+
+  cancelEditStats() {
+    this.editingStats.set(false);
+    this.statsForm = JSON.parse(JSON.stringify(this.appSettingsService.getStats()));
+  }
+
+  async saveStats() {
+    await this.appSettingsService.updateStats(this.statsForm);
+    this.editingStats.set(false);
+  }
+
+  addStat() {
+    this.statsForm.push({ value: '', label: '', icon: '' });
+  }
+
+  removeStat(index: number) {
+    this.statsForm.splice(index, 1);
+  }
+
+  get currentStats(): any[] {
+    return this.appSettingsService.getStats();
   }
 }

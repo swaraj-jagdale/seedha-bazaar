@@ -1,10 +1,11 @@
 import { Component, signal, computed } from '@angular/core';
 import { LanguageService } from '../../services/language.service';
 import { AppSettingsService } from '../../services/app-settings.service';
+import { Stats } from '../stats/stats';
 
 @Component({
   selector: 'app-footer',
-  imports: [],
+  imports: [Stats],
   templateUrl: './footer.html',
   styleUrl: './footer.scss',
 })

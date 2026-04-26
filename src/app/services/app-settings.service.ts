@@ -13,11 +13,20 @@ export interface FAQ {
   answer: string;
 }
 
+export interface Stat {
+  value: string;
+  label: string;
+  icon: string;
+}
+
 export interface AppSettings {
   heroLocation?: string;
   phoneNumber?: string;
   testimonials?: Testimonial[];
   faqs?: FAQ[];
+  defaultMandi?: string;
+  mandiList?: string[];
+  stats?: Stat[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -41,6 +50,13 @@ export class AppSettingsService {
       const defaultSettings: AppSettings = {
         heroLocation: 'Now connecting farmers in Dhule district!',
         phoneNumber: '9432446384',
+        defaultMandi: 'Azadpur Mandi',
+        mandiList: ['Azadpur Mandi', 'Vashi Mandi', 'Lasalgaon Mandi'],
+        stats: [
+          { value: '120+', label: 'Farmers', icon: '👨‍🌾' },
+          { value: '85+', label: 'APMCs', icon: '🏛️' },
+          { value: '6+', label: 'Countries', icon: '🌍' },
+        ],
         testimonials: [
           {
             name: 'Ramesh Kumar',
@@ -158,6 +174,39 @@ export class AppSettingsService {
         },
       ]
     );
+  }
+
+  getDefaultMandi(): string {
+    return this.settings().defaultMandi || 'Azadpur Mandi';
+  }
+
+  getMandiList(): string[] {
+    return this.settings().mandiList || ['Azadpur Mandi', 'Vashi Mandi', 'Lasalgaon Mandi'];
+  }
+
+  async updateDefaultMandi(mandi: string) {
+    const docRef = doc(db, 'appSettings', 'default');
+    await setDoc(docRef, { defaultMandi: mandi }, { merge: true });
+  }
+
+  async updateMandiList(mandiList: string[]) {
+    const docRef = doc(db, 'appSettings', 'default');
+    await setDoc(docRef, { mandiList }, { merge: true });
+  }
+
+  getStats(): Stat[] {
+    return (
+      this.settings().stats || [
+        { value: '120+', label: 'Farmers', icon: '👨‍🌾' },
+        { value: '85+', label: 'APMCs', icon: '🏛️' },
+        { value: '6+', label: 'Countries', icon: '🌍' },
+      ]
+    );
+  }
+
+  async updateStats(stats: Stat[]) {
+    const docRef = doc(db, 'appSettings', 'default');
+    await setDoc(docRef, { stats }, { merge: true });
   }
 
   cleanup() {

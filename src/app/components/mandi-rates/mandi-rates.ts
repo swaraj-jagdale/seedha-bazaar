@@ -1,6 +1,8 @@
-import { Component, signal, effect, OnDestroy } from '@angular/core';
+import { Component, signal, OnDestroy, effect } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { RatesService, CropRate } from '../../services/rates.service';
 import { LanguageService } from '../../services/language.service';
+import { AppSettingsService } from '../../services/app-settings.service';
 
 interface DisplayRate {
   name: string;
@@ -12,13 +14,13 @@ interface DisplayRate {
 
 @Component({
   selector: 'app-mandi-rates',
-  imports: [],
+  imports: [FormsModule],
   templateUrl: './mandi-rates.html',
   styleUrl: './mandi-rates.scss',
 })
 export class MandiRates implements OnDestroy {
-  selectedMandi = signal('Azadpur Mandi');
-  mandis = ['Azadpur Mandi', 'Vashi Mandi', 'Lasalgaon Mandi'];
+  selectedMandi = signal('');
+  mandis = signal<string[]>([]);
   displayRates = signal<DisplayRate[]>([]);
   loading = signal(true);
   todayDate = new Date().toLocaleDateString('en-IN', {
@@ -167,7 +169,12 @@ export class MandiRates implements OnDestroy {
   constructor(
     public ratesService: RatesService,
     public lang: LanguageService,
+    private appSettingsService: AppSettingsService,
   ) {
+    // Initialize from app settings
+    this.selectedMandi.set(this.appSettingsService.getDefaultMandi());
+    this.mandis.set(this.appSettingsService.getMandiList());
+
     // Set initial fallback
     this.displayRates.set(
       this.fallbackRatesMap[this.selectedMandi()] || this.fallbackRatesMap['Azadpur Mandi'],
@@ -248,5 +255,9 @@ export class MandiRates implements OnDestroy {
     const select = event.target as HTMLSelectElement;
     this.selectedMandi.set(select.value);
     this.startListener();
+    // Immediately update display with fallback for selected mandi
+    this.displayRates.set(
+      this.fallbackRatesMap[this.selectedMandi()] || this.fallbackRatesMap['Azadpur Mandi'],
+    );
   }
 }

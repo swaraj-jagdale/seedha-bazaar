@@ -619,6 +619,139 @@
             </div>
           }
         </div>
+
+        <div class="data-card enhanced-card settings-card">
+          <div class="card-header">
+            <div class="card-main">
+              <div class="card-icon">📊</div>
+              <div class="card-info">
+                <h3>Statistics</h3>
+                <p class="card-subtitle">Edit homepage statistics</p>
+              </div>
+            </div>
+            @if (!editingStats()) {
+              <button class="edit-btn" (click)="startEditStats()">✏️ Edit</button>
+            }
+          </div>
+          @if (editingStats()) {
+            <div class="edit-form">
+              @for (stat of statsForm; track stat; let i = $index) {
+                <div class="stat-edit-item">
+                  <div class="form-group">
+                    <label>Value</label>
+                    <input type="text" [(ngModel)]="statsForm[i].value" placeholder="e.g. 120+" />
+                  </div>
+                  <div class="form-group">
+                    <label>Label</label>
+                    <input
+                      type="text"
+                      [(ngModel)]="statsForm[i].label"
+                      placeholder="e.g. Farmers"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label>Icon</label>
+                    <input type="text" [(ngModel)]="statsForm[i].icon" placeholder="e.g. 👨‍🌾" />
+                  </div>
+                  <button class="remove-btn" (click)="removeStat(i)">Remove</button>
+                </div>
+              }
+              <button class="add-btn" (click)="addStat()">+ Add Stat</button>
+              <div class="edit-actions">
+                <button class="save-btn" (click)="saveStats()">💾 Save</button>
+                <button class="cancel-btn" (click)="cancelEditStats()">❌ Cancel</button>
+              </div>
+            </div>
+          } @else {
+            <div class="settings-display">
+              @for (stat of currentStats; track stat) {
+                <div class="stat-preview">
+                  <span class="preview-icon">{{ stat.icon }}</span>
+                  <div class="preview-details">
+                    <p class="preview-value">{{ stat.value }}</p>
+                    <p class="preview-label">{{ stat.label }}</p>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="data-card enhanced-card settings-card">
+          <div class="card-header">
+            <div class="card-main">
+              <div class="card-icon">🏛️</div>
+              <div class="card-info">
+                <h3>Default Mandi</h3>
+                <p class="card-subtitle">Edit the default selected mandi</p>
+              </div>
+            </div>
+            @if (!editingDefaultMandi()) {
+              <button class="edit-btn" (click)="startEditDefaultMandi()">✏️ Edit</button>
+            }
+          </div>
+          @if (editingDefaultMandi()) {
+            <div class="edit-form">
+              <div class="form-group">
+                <label>Default Mandi</label>
+                <select [(ngModel)]="defaultMandiForm">
+                  @for (mandi of mandiListForm; track mandi) {
+                    <option [value]="mandi">{{ mandi }}</option>
+                  }
+                </select>
+              </div>
+              <div class="edit-actions">
+                <button class="save-btn" (click)="saveDefaultMandi()">💾 Save</button>
+                <button class="cancel-btn" (click)="cancelEditDefaultMandi()">❌ Cancel</button>
+              </div>
+            </div>
+          } @else {
+            <div class="settings-display">
+              <p class="current-value">{{ currentDefaultMandi }}</p>
+            </div>
+          }
+        </div>
+
+        <div class="data-card enhanced-card settings-card">
+          <div class="card-header">
+            <div class="card-main">
+              <div class="card-icon">📋</div>
+              <div class="card-info">
+                <h3>Mandi List</h3>
+                <p class="card-subtitle">Edit the list of available mandis</p>
+              </div>
+            </div>
+            @if (!editingMandiList()) {
+              <button class="edit-btn" (click)="startEditMandiList()">✏️ Edit</button>
+            }
+          </div>
+          @if (editingMandiList()) {
+            <div class="edit-form">
+              @for (mandi of mandiListForm; track mandi; let i = $index) {
+                <div class="mandi-edit-item">
+                  <div class="form-group">
+                    <label>Mandi Name</label>
+                    <input type="text" [(ngModel)]="mandiListForm[i]" placeholder="Mandi name" />
+                  </div>
+                  <button class="remove-btn" (click)="removeMandi(i)">Remove</button>
+                </div>
+              }
+              <button class="add-btn" (click)="addMandi()">+ Add Mandi</button>
+              <div class="edit-actions">
+                <button class="save-btn" (click)="saveMandiList()">💾 Save</button>
+                <button class="cancel-btn" (click)="cancelEditMandiList()">❌ Cancel</button>
+              </div>
+            </div>
+          } @else {
+            <div class="settings-display">
+              @for (mandi of currentMandiList; track mandi) {
+                <div class="mandi-preview">
+                  <p class="preview-name">{{ mandi }}</p>
+                </div>
+              }
+            </div>
+          }
+        </div>
       </div>
     }
   </div>
