@@ -24,7 +24,7 @@ const en: TranslationMap = {
   'hero.location': 'Now connecting farmers in Dhule district!',
 
   // Mandi Rates
-  'rates.title': 'Azadpur Mandi Rates',
+  'rates.title': 'Rates',
   'rates.subtitle': 'Daily Market Rates for',
   'rates.updatedAt': 'Updated at 10 AM',
   'rates.crop': 'CROP',
@@ -248,8 +248,7 @@ const hi: TranslationMap = {
     '\u0905\u092C \u0927\u0941\u0933\u0947 \u091C\u093F\u0932\u0947 \u0915\u0947 \u0915\u093F\u0938\u093E\u0928\u094B\u0902 \u0915\u094B \u091C\u094B\u0921\u093C \u0930\u0939\u0947 \u0939\u0948\u0902!',
 
   // Mandi Rates
-  'rates.title':
-    '\u0906\u095B\u093E\u0926\u092A\u0941\u0930 \u092E\u0902\u0921\u0940 \u092D\u093E\u0935',
+  'rates.title': '\u092D\u093E\u0935',
   'rates.subtitle':
     '\u0926\u0948\u0928\u093F\u0915 \u092C\u093E\u091C\u093E\u0930 \u092D\u093E\u0935',
   'rates.updatedAt':
@@ -546,8 +545,7 @@ const mr: TranslationMap = {
     '\u0906\u0924\u093E \u0927\u0941\u0933\u0947 \u091C\u093F\u0932\u094D\u0939\u094D\u092F\u093E\u0924\u0940\u0932 \u0936\u0947\u0924\u0915\u0931\u094D\u092F\u093E\u0902\u0928\u093E \u091C\u094B\u0921\u0924 \u0906\u0939\u094B\u0924!',
 
   // Mandi Rates
-  'rates.title':
-    '\u0906\u091C\u093E\u0926\u092A\u0942\u0930 \u092E\u0902\u0921\u0940 \u092D\u093E\u0935',
+  'rates.title': '\u092D\u093E\u0935',
   'rates.subtitle':
     '\u0926\u0948\u0928\u093F\u0915 \u092C\u093E\u091C\u093E\u0930 \u092D\u093E\u0935',
   'rates.updatedAt':
