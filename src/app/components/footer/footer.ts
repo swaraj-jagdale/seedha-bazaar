@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, signal, computed } from '@angular/core';
 import { LanguageService } from '../../services/language.service';
+import { AppSettingsService } from '../../services/app-settings.service';
 
 @Component({
   selector: 'app-footer',
@@ -9,5 +10,11 @@ import { LanguageService } from '../../services/language.service';
 })
 export class Footer {
   currentYear = new Date().getFullYear();
-  constructor(public lang: LanguageService) {}
+  testimonials = computed(() => this.appSettingsService.getTestimonials());
+  faqs = computed(() => this.appSettingsService.getFAQs());
+
+  constructor(
+    public lang: LanguageService,
+    private appSettingsService: AppSettingsService,
+  ) {}
 }

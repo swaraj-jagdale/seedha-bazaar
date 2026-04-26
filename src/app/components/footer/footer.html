@@ -1,14 +1,69 @@
 <footer class="footer">
-  <div class="cta-banner">
-    <div class="cta-container">
-      <div class="cta-left">
-        <img src="assets/images/phone-icon.svg" alt="Phone" width="22" height="22">
-        <span>{{ lang.t('footer.callToSell') }}</span>
+  <!-- Vision & Mission Section -->
+  <div class="vision-mission-section">
+    <div class="vm-container">
+      <div class="vm-col">
+        <div class="vm-icon">🎯</div>
+        <h3>Vision</h3>
+        <p>
+          Empowering India's agricultural ecosystem by connecting farmers directly with merchants,
+          ensuring fair prices and reducing wastage through efficient supply chain management.
+        </p>
       </div>
-      <div class="cta-logo">
-        <img src="assets/images/logo.svg" alt="Seedha Bazaar Logo" width="30" height="30">
-        <div class="cta-logo-text">
-          <span class="logo-name"><span class="seedha">SEEDHA</span> <span class="bazaar">BAZAAR</span></span>
+      <div class="vm-col">
+        <div class="vm-icon">🚀</div>
+        <h3>Mission</h3>
+        <p>
+          To create a transparent, sustainable, and technology-driven marketplace that benefits
+          every stakeholder in the agricultural value chain from farm to market.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Testimonials Section -->
+  <div class="testimonials-section">
+    <div class="testimonials-container">
+      <h2 class="section-title">What Our Users Say</h2>
+      <div class="testimonials-grid">
+        @for (testimonial of testimonials(); track testimonial) {
+          <div class="testimonial-card">
+            <div class="quote-icon">❝</div>
+            <p class="testimonial-text">"{{ testimonial.text }}"</p>
+            <div class="testimonial-author">
+              <span class="author-name">{{ testimonial.name }}</span>
+              <span class="author-role">{{ testimonial.role }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Services Section -->
+  <div class="services-section">
+    <div class="services-container">
+      <h2 class="section-title">Our Services</h2>
+      <div class="services-grid">
+        <div class="service-card">
+          <div class="service-icon">🌾</div>
+          <h4>Farm to Market</h4>
+          <p>Direct connection between farmers and merchants</p>
+        </div>
+        <div class="service-card">
+          <div class="service-icon">📊</div>
+          <h4>Real-time Rates</h4>
+          <p>Daily updated mandi prices across India</p>
+        </div>
+        <div class="service-card">
+          <div class="service-icon">🚚</div>
+          <h4>Logistics Support</h4>
+          <p>Efficient transportation and delivery</p>
+        </div>
+        <div class="service-card">
+          <div class="service-icon">💰</div>
+          <h4>Secure Payments</h4>
+          <p>Safe and timely payment processing</p>
         </div>
       </div>
     </div>
@@ -27,6 +82,17 @@
       <div class="footer-col">
         <h4>{{ lang.t('footer.aboutUs') }}</h4>
         <a href="#">{{ lang.t('footer.aboutSB') }}</a>
+      </div>
+      <div class="footer-col">
+        <h4>Contact Info</h4>
+        <a href="mailto:info@seedhabazaar.com">
+          <span class="contact-icon">📧</span>
+          info@seedhabazaar.com
+        </a>
+        <a href="tel:+919876543210">
+          <span class="contact-icon">📞</span>
+          +91 98765 43210
+        </a>
       </div>
     </div>
   </div>

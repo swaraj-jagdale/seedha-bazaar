@@ -1,20 +1,79 @@
 <div class="admin-page">
   <div class="admin-header">
     <div class="admin-title">
-      <img src="assets/images/logo.svg" alt="Logo" width="32" height="32">
-      <h1>Admin Panel</h1>
+      <img src="assets/images/logo.svg" alt="Logo" width="32" height="32" />
+      <div>
+        <h1>Admin Dashboard</h1>
+        <p class="header-subtitle">Manage rates, orders, and users</p>
+      </div>
     </div>
     <button class="logout-btn" (click)="logout()">Logout</button>
   </div>
 
+  <!-- Statistics Cards -->
+  <div class="stats-grid">
+    <div class="stat-card stat-rates">
+      <div class="stat-icon">📊</div>
+      <div class="stat-content">
+        <h3>{{ adminService.allRates().length }}</h3>
+        <p>Total Rates</p>
+      </div>
+    </div>
+    <div class="stat-card stat-orders">
+      <div class="stat-icon">📦</div>
+      <div class="stat-content">
+        <h3>{{ adminService.allOrders().length }}</h3>
+        <p>Total Orders</p>
+      </div>
+    </div>
+    <div class="stat-card stat-users">
+      <div class="stat-icon">👥</div>
+      <div class="stat-content">
+        <h3>{{ adminService.allUsers().length }}</h3>
+        <p>Total Users</p>
+      </div>
+    </div>
+    <div class="stat-card stat-pending">
+      <div class="stat-icon">⏳</div>
+      <div class="stat-content">
+        <h3>{{ adminService.allOrders().filter((o) => o.status === 'requested').length }}</h3>
+        <p>Pending Orders</p>
+      </div>
+    </div>
+  </div>
+
   <div class="admin-tabs">
-    <button [class.active]="activeTab() === 'rates'" (click)="setTab('rates')">Rates ({{ adminService.allRates().length }})</button>
-    <button [class.active]="activeTab() === 'orders'" (click)="setTab('orders')">Orders ({{ adminService.allOrders().length }})</button>
-    <button [class.active]="activeTab() === 'users'" (click)="setTab('users')">Users ({{ adminService.allUsers().length }})</button>
+    <button [class.active]="activeTab() === 'rates'" (click)="setTab('rates')">
+      <span class="tab-icon">📊</span>
+      <span>Rates</span>
+      <span class="tab-count">{{ adminService.allRates().length }}</span>
+    </button>
+    <button [class.active]="activeTab() === 'orders'" (click)="setTab('orders')">
+      <span class="tab-icon">📦</span>
+      <span>Orders</span>
+      <span class="tab-count">{{ adminService.allOrders().length }}</span>
+    </button>
+    <button [class.active]="activeTab() === 'users'" (click)="setTab('users')">
+      <span class="tab-icon">👥</span>
+      <span>Users</span>
+      <span class="tab-count">{{ adminService.allUsers().length }}</span>
+    </button>
+    <button [class.active]="activeTab() === 'settings'" (click)="setTab('settings')">
+      <span class="tab-icon">⚙️</span>
+      <span>Settings</span>
+    </button>
   </div>
 
   <div class="admin-search">
-    <input type="text" placeholder="Search..." [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)" />
+    <div class="search-wrapper">
+      <span class="search-icon">🔍</span>
+      <input
+        type="text"
+        placeholder="Search..."
+        [ngModel]="searchQuery()"
+        (ngModelChange)="searchQuery.set($event)"
+      />
+    </div>
   </div>
 
   <div class="admin-content">
@@ -22,30 +81,39 @@
     @if (activeTab() === 'rates') {
       <div class="data-list">
         @for (rate of filteredRates(); track rate.id) {
-          <div class="data-card">
-            <div class="card-row">
-              <img [src]="ratesService.getCropImage(rate.crop)" [alt]="rate.crop" class="crop-img">
-              <div class="card-info">
-                <h3>{{ rate.crop }}</h3>
-                <span class="meta">{{ rate.merchantName }} &middot; {{ rate.mandi }}</span>
+          <div class="data-card enhanced-card">
+            <div class="card-header">
+              <div class="card-main">
+                <img
+                  [src]="ratesService.getCropImage(rate.crop)"
+                  [alt]="rate.crop"
+                  class="crop-img"
+                />
+                <div class="card-info">
+                  <h3>{{ rate.crop }}</h3>
+                  <div class="card-meta">
+                    <span class="meta-tag">{{ rate.mandi }}</span>
+                    <span class="meta-tag merchant">{{ rate.merchantName }}</span>
+                  </div>
+                </div>
               </div>
               <div class="card-actions">
-                <button class="edit-btn" (click)="startEditRate(rate)">Edit</button>
-                <button class="delete-btn" (click)="deleteRate(rate)">Delete</button>
+                <button class="edit-btn" (click)="startEditRate(rate)">✏️ Edit</button>
+                <button class="delete-btn" (click)="deleteRate(rate)">🗑️ Delete</button>
               </div>
             </div>
 
             @if (editingRate()?.id !== rate.id) {
               <div class="grade-grid">
-                <div class="grade-item">
+                <div class="grade-item grade-a">
                   <span class="grade-label">Grade A</span>
                   <span class="grade-price">{{ formatPrice(rate.gradeAMin, rate.gradeAMax) }}</span>
                 </div>
-                <div class="grade-item">
+                <div class="grade-item grade-b">
                   <span class="grade-label">Grade B</span>
                   <span class="grade-price">{{ formatPrice(rate.gradeBMin, rate.gradeBMax) }}</span>
                 </div>
-                <div class="grade-item">
+                <div class="grade-item grade-c">
                   <span class="grade-label">Grade C</span>
                   <span class="grade-price">{{ formatPrice(rate.gradeCMin, rate.gradeCMax) }}</span>
                 </div>
@@ -54,34 +122,45 @@
 
             @if (editingRate()?.id === rate.id) {
               <div class="edit-form">
-                <div class="price-row">
-                  <label>Grade A</label>
-                  <input type="number" [(ngModel)]="editForm.gradeAMin" placeholder="Min" />
-                  <span>-</span>
-                  <input type="number" [(ngModel)]="editForm.gradeAMax" placeholder="Max" />
-                </div>
-                <div class="price-row">
-                  <label>Grade B</label>
-                  <input type="number" [(ngModel)]="editForm.gradeBMin" placeholder="Min" />
-                  <span>-</span>
-                  <input type="number" [(ngModel)]="editForm.gradeBMax" placeholder="Max" />
-                </div>
-                <div class="price-row">
-                  <label>Grade C</label>
-                  <input type="number" [(ngModel)]="editForm.gradeCMin" placeholder="Min" />
-                  <span>-</span>
-                  <input type="number" [(ngModel)]="editForm.gradeCMax" placeholder="Max" />
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label>Grade A Min</label>
+                    <input type="number" [(ngModel)]="editForm.gradeAMin" placeholder="Min" />
+                  </div>
+                  <div class="form-group">
+                    <label>Grade A Max</label>
+                    <input type="number" [(ngModel)]="editForm.gradeAMax" placeholder="Max" />
+                  </div>
+                  <div class="form-group">
+                    <label>Grade B Min</label>
+                    <input type="number" [(ngModel)]="editForm.gradeBMin" placeholder="Min" />
+                  </div>
+                  <div class="form-group">
+                    <label>Grade B Max</label>
+                    <input type="number" [(ngModel)]="editForm.gradeBMax" placeholder="Max" />
+                  </div>
+                  <div class="form-group">
+                    <label>Grade C Min</label>
+                    <input type="number" [(ngModel)]="editForm.gradeCMin" placeholder="Min" />
+                  </div>
+                  <div class="form-group">
+                    <label>Grade C Max</label>
+                    <input type="number" [(ngModel)]="editForm.gradeCMax" placeholder="Max" />
+                  </div>
                 </div>
                 <div class="edit-actions">
-                  <button class="save-btn" (click)="saveRate()">Save</button>
-                  <button class="cancel-btn" (click)="cancelEditRate()">Cancel</button>
+                  <button class="save-btn" (click)="saveRate()">💾 Save Changes</button>
+                  <button class="cancel-btn" (click)="cancelEditRate()">❌ Cancel</button>
                 </div>
               </div>
             }
           </div>
         }
         @if (filteredRates().length === 0) {
-          <p class="empty-state">No rates found.</p>
+          <div class="empty-state">
+            <span class="empty-icon">📊</span>
+            <p>No rates found.</p>
+          </div>
         }
       </div>
     }
@@ -90,44 +169,149 @@
     @if (activeTab() === 'orders') {
       <div class="data-list">
         @for (order of filteredOrders(); track order.id) {
-          <div class="data-card">
-            <div class="card-row">
-              <img [src]="ratesService.getCropImage(order.crop)" [alt]="order.crop" class="crop-img">
-              <div class="card-info">
-                <h3>{{ order.crop }} - Grade {{ order.grade }}</h3>
-                <span class="meta">{{ order.farmerName }} &rarr; {{ order.merchantName }}</span>
-                <span class="meta">{{ order.quantity }} {{ order.unit }} &middot; {{ order.mandi }}</span>
+          <div class="data-card enhanced-card order-card">
+            <div class="card-header">
+              <div class="card-main">
+                <img
+                  [src]="ratesService.getCropImage(order.crop)"
+                  [alt]="order.crop"
+                  class="crop-img"
+                />
+                <div class="card-info">
+                  <h3>{{ order.crop }} - Grade {{ order.grade }}</h3>
+                  <div class="card-meta">
+                    <span class="meta-tag">👤 {{ order.farmerName }}</span>
+                    <span class="meta-tag">→ 🏪 {{ order.merchantName }}</span>
+                    <span class="meta-tag">📍 {{ order.mandi }}</span>
+                  </div>
+                </div>
               </div>
               <div class="card-status">
-                <span class="status-badge" [class]="getStatusClass(order.status)">{{ order.status }}</span>
-                <button class="edit-btn" (click)="startUpdateOrder(order.id!, order.status)">Update</button>
+                <span class="status-badge" [class]="getStatusClass(order.status)">{{
+                  order.status
+                }}</span>
+                <button class="edit-btn" (click)="startUpdateOrder(order.id!, order.status, order)">
+                  ✏️ Update
+                </button>
               </div>
             </div>
 
-            @if (updatingOrderId() === order.id) {
-              <div class="edit-form">
-                <div class="status-row">
-                  <label>New Status</label>
-                  <select [(ngModel)]="newStatus">
-                    @for (s of statusOptions; track s) {
-                      <option [value]="s">{{ s }}</option>
-                    }
-                  </select>
-                </div>
-                <div class="status-row">
-                  <label>Note (optional)</label>
-                  <input type="text" [(ngModel)]="statusNote" placeholder="Status update note" />
+            <div class="order-details">
+              <div class="detail-row">
+                <span class="detail-label">Quantity:</span>
+                <span class="detail-value">{{ order.quantity }} {{ order.unit }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Price/Unit:</span>
+                <span class="detail-value">₹{{ order.pricePerUnit }}/kg</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Total Amount:</span>
+                <span class="detail-value">₹{{ order.totalAmount.toLocaleString() }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Commission:</span>
+                <span class="detail-value">₹{{ order.commission.toLocaleString() }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Net Amount:</span>
+                <span class="detail-value">₹{{ order.netAmount.toLocaleString() }}</span>
+              </div>
+              <button class="edit-details-btn" (click)="startEditOrderDetails(order)">
+                ✏️ Edit Details
+              </button>
+            </div>
+
+            @if (editingOrderDetails() === order.id) {
+              <div class="edit-form order-edit-form">
+                <h4>Edit Order Details</h4>
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label>Quantity</label>
+                    <input type="number" [(ngModel)]="orderDetailsForm.quantity" />
+                  </div>
+                  <div class="form-group">
+                    <label>Price/Unit</label>
+                    <input type="number" [(ngModel)]="orderDetailsForm.pricePerUnit" />
+                  </div>
+                  <div class="form-group">
+                    <label>Total Amount</label>
+                    <input type="number" [(ngModel)]="orderDetailsForm.totalAmount" />
+                  </div>
+                  <div class="form-group">
+                    <label>Commission</label>
+                    <input type="number" [(ngModel)]="orderDetailsForm.commission" />
+                  </div>
+                  <div class="form-group">
+                    <label>Net Amount</label>
+                    <input type="number" [(ngModel)]="orderDetailsForm.netAmount" />
+                  </div>
                 </div>
                 <div class="edit-actions">
-                  <button class="save-btn" (click)="saveOrderStatus()">Save</button>
-                  <button class="cancel-btn" (click)="cancelUpdateOrder()">Cancel</button>
+                  <button class="save-btn" (click)="saveOrderDetails()">💾 Save</button>
+                  <button class="cancel-btn" (click)="cancelEditOrderDetails()">❌ Cancel</button>
+                </div>
+              </div>
+            }
+
+            @if (updatingOrderId() === order.id) {
+              <div class="edit-form order-edit-form">
+                <h4>Update Order Status & Logistics</h4>
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label>New Status</label>
+                    <select [(ngModel)]="newStatus">
+                      @for (s of statusOptions; track s) {
+                        <option [value]="s">{{ s }}</option>
+                      }
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>Note (optional)</label>
+                    <input type="text" [(ngModel)]="statusNote" placeholder="Status update note" />
+                  </div>
+                  <div class="form-group">
+                    <label>Transport Partner</label>
+                    <input
+                      type="text"
+                      [(ngModel)]="logisticsForm.transportPartner"
+                      placeholder="e.g. ABC Transport"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label>Vehicle Number</label>
+                    <input
+                      type="text"
+                      [(ngModel)]="logisticsForm.vehicleNumber"
+                      placeholder="e.g. MH-12-AB-1234"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label>Pickup Date</label>
+                    <input type="date" [(ngModel)]="logisticsForm.pickupDate" />
+                  </div>
+                  <div class="form-group">
+                    <label>Pickup Time</label>
+                    <input type="time" [(ngModel)]="logisticsForm.pickupTime" />
+                  </div>
+                  <div class="form-group">
+                    <label>Estimated Delivery</label>
+                    <input type="date" [(ngModel)]="logisticsForm.estimatedDelivery" />
+                  </div>
+                </div>
+                <div class="edit-actions">
+                  <button class="save-btn" (click)="saveOrderStatus()">💾 Save Changes</button>
+                  <button class="cancel-btn" (click)="cancelUpdateOrder()">❌ Cancel</button>
                 </div>
               </div>
             }
           </div>
         }
         @if (filteredOrders().length === 0) {
-          <p class="empty-state">No orders found.</p>
+          <div class="empty-state">
+            <span class="empty-icon">📦</span>
+            <p>No orders found.</p>
+          </div>
         }
       </div>
     }
@@ -136,21 +320,305 @@
     @if (activeTab() === 'users') {
       <div class="data-list">
         @for (user of filteredUsers(); track user.uid) {
-          <div class="data-card">
-            <div class="card-row">
-              <div class="user-avatar">{{ user.profile.displayName.charAt(0).toUpperCase() }}</div>
-              <div class="card-info">
-                <h3>{{ user.profile.displayName }}</h3>
-                <span class="meta">{{ user.profile.email }} &middot; {{ user.profile.phone }}</span>
-                <span class="meta">{{ user.role === 'merchant' ? 'Merchant' : 'Farmer' }}</span>
+          <div class="data-card enhanced-card user-card">
+            <div class="card-header">
+              <div class="card-main">
+                <div class="user-avatar">
+                  {{ user.profile.displayName.charAt(0).toUpperCase() }}
+                </div>
+                <div class="card-info">
+                  <h3>{{ user.profile.displayName }}</h3>
+                  <div class="card-meta">
+                    <span class="meta-tag">📧 {{ user.profile.email }}</span>
+                    <span class="meta-tag">📱 {{ user.profile.phone }}</span>
+                  </div>
+                </div>
               </div>
-              <span class="role-badge" [class]="user.role">{{ user.role }}</span>
+              <div class="card-status">
+                <span class="role-badge" [class]="user.role">{{
+                  user.role === 'merchant' ? '🏪 Merchant' : '🌾 Farmer'
+                }}</span>
+                <button class="edit-btn" (click)="startEditUser(user)">✏️ Edit</button>
+              </div>
             </div>
+            <div class="user-details">
+              <div class="detail-row">
+                <span class="detail-label">UID:</span>
+                <span class="detail-value">{{ user.uid }}</span>
+              </div>
+              @if (user.role === 'merchant') {
+                <div class="detail-row">
+                  <span class="detail-label">Address:</span>
+                  <span class="detail-value">{{ getUserAddress(user) }}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">District:</span>
+                  <span class="detail-value">{{ getUserDistrict(user) }}</span>
+                </div>
+              }
+              @if (user.role === 'farmer') {
+                <div class="detail-row">
+                  <span class="detail-label">Village:</span>
+                  <span class="detail-value">{{ getUserVillage(user) }}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">District:</span>
+                  <span class="detail-value">{{ getUserDistrict(user) }}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Crops:</span>
+                  <span class="detail-value">{{ getUserCrops(user) }}</span>
+                </div>
+              }
+            </div>
+
+            @if (editingUserId() === user.uid) {
+              <div class="edit-form user-edit-form">
+                <h4>Edit User Profile</h4>
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label>Display Name</label>
+                    <input type="text" [(ngModel)]="userForm.displayName" />
+                  </div>
+                  <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" [(ngModel)]="userForm.email" />
+                  </div>
+                  <div class="form-group">
+                    <label>Phone</label>
+                    <input type="text" [(ngModel)]="userForm.phone" />
+                  </div>
+                  <div class="form-group">
+                    <label>District</label>
+                    <input type="text" [(ngModel)]="userForm.district" />
+                  </div>
+                  <div class="form-group">
+                    <label>Taluka</label>
+                    <input type="text" [(ngModel)]="userForm.taluka" />
+                  </div>
+                  <div class="form-group">
+                    <label>Pincode</label>
+                    <input type="text" [(ngModel)]="userForm.pincode" />
+                  </div>
+                  @if (user.role === 'merchant') {
+                    <div class="form-group">
+                      <label>Address</label>
+                      <input type="text" [(ngModel)]="userForm.address" />
+                    </div>
+                  }
+                  @if (user.role === 'farmer') {
+                    <div class="form-group">
+                      <label>Village</label>
+                      <input type="text" [(ngModel)]="userForm.village" />
+                    </div>
+                    <div class="form-group">
+                      <label>Acreage</label>
+                      <input type="number" [(ngModel)]="userForm.acreage" />
+                    </div>
+                    <div class="form-group" style="grid-column: span 2">
+                      <label>Crops</label>
+                      <div class="crops-list">
+                        @for (crop of userForm.crops; track crop; let i = $index) {
+                          <span class="crop-tag">
+                            {{ crop }}
+                            <button type="button" class="remove-crop" (click)="removeCrop(i)">
+                              ×
+                            </button>
+                          </span>
+                        }
+                        <button type="button" class="add-crop-btn" (click)="addCrop()">
+                          + Add Crop
+                        </button>
+                      </div>
+                    </div>
+                  }
+                </div>
+                <div class="edit-actions">
+                  <button class="save-btn" (click)="saveUserProfile()">💾 Save</button>
+                  <button class="cancel-btn" (click)="cancelEditUser()">❌ Cancel</button>
+                </div>
+              </div>
+            }
           </div>
         }
         @if (filteredUsers().length === 0) {
-          <p class="empty-state">No users found.</p>
+          <div class="empty-state">
+            <span class="empty-icon"></span>
+            <span class="empty-icon">👥</span>
+            <p>No users found.</p>
+          </div>
         }
+      </div>
+    }
+
+    <!-- SETTINGS TAB -->
+    @if (activeTab() === 'settings') {
+      <div class="data-list">
+        <div class="data-card enhanced-card settings-card">
+          <div class="card-header">
+            <div class="card-main">
+              <div class="card-icon">📍</div>
+              <div class="card-info">
+                <h3>Hero Location Message</h3>
+                <p class="card-subtitle">Edit the location message shown on the hero section</p>
+              </div>
+            </div>
+            @if (!editingHeroLocation()) {
+              <button class="edit-btn" (click)="startEditHeroLocation()">✏️ Edit</button>
+            }
+          </div>
+          @if (editingHeroLocation()) {
+            <div class="edit-form">
+              <div class="form-group">
+                <label>Location Message</label>
+                <input
+                  type="text"
+                  [(ngModel)]="heroLocationForm"
+                  placeholder="Enter location message"
+                />
+              </div>
+              <div class="edit-actions">
+                <button class="save-btn" (click)="saveHeroLocation()">Save</button>
+                <button class="cancel-btn" (click)="cancelEditHeroLocation()">Cancel</button>
+              </div>
+            </div>
+          } @else {
+            <div class="settings-display">
+              <p class="current-value">{{ currentHeroLocation }}</p>
+            </div>
+          }
+        </div>
+
+        <div class="data-card enhanced-card settings-card">
+          <div class="card-header">
+            <div class="card-main">
+              <div class="card-icon">📞</div>
+              <div class="card-info">
+                <h3>Phone Number</h3>
+                <p class="card-subtitle">Edit the phone number shown in the footer CTA</p>
+              </div>
+            </div>
+            @if (!editingPhoneNumber()) {
+              <button class="edit-btn" (click)="startEditPhoneNumber()">✏️ Edit</button>
+            }
+          </div>
+          @if (editingPhoneNumber()) {
+            <div class="edit-form">
+              <div class="form-group">
+                <label>Phone Number</label>
+                <input type="text" [(ngModel)]="phoneNumberForm" placeholder="Enter phone number" />
+              </div>
+              <div class="edit-actions">
+                <button class="save-btn" (click)="savePhoneNumber()">Save</button>
+                <button class="cancel-btn" (click)="cancelEditPhoneNumber()">Cancel</button>
+              </div>
+            </div>
+          } @else {
+            <div class="settings-display">
+              <p class="current-value">{{ currentPhoneNumber }}</p>
+            </div>
+          }
+        </div>
+
+        <div class="data-card enhanced-card settings-card">
+          <div class="card-header">
+            <div class="card-main">
+              <div class="card-icon">💬</div>
+              <div class="card-info">
+                <h3>Testimonials</h3>
+                <p class="card-subtitle">Edit user testimonials shown in the footer</p>
+              </div>
+            </div>
+            @if (!editingTestimonials()) {
+              <button class="edit-btn" (click)="startEditTestimonials()">✏️ Edit</button>
+            }
+          </div>
+          @if (editingTestimonials()) {
+            <div class="edit-form">
+              @for (testimonial of testimonialsForm; track testimonial; let i = $index) {
+                <div class="testimonial-edit-item">
+                  <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" [(ngModel)]="testimonial.name" placeholder="Name" />
+                  </div>
+                  <div class="form-group">
+                    <label>Role</label>
+                    <input type="text" [(ngModel)]="testimonial.role" placeholder="Role" />
+                  </div>
+                  <div class="form-group">
+                    <label>Testimonial</label>
+                    <textarea
+                      [(ngModel)]="testimonial.text"
+                      rows="2"
+                      placeholder="Testimonial text"
+                    ></textarea>
+                  </div>
+                  <button class="remove-btn" (click)="removeTestimonial(i)">Remove</button>
+                </div>
+              }
+              <button class="add-btn" (click)="addTestimonial()">+ Add Testimonial</button>
+              <div class="edit-actions">
+                <button class="save-btn" (click)="saveTestimonials()">💾 Save</button>
+                <button class="cancel-btn" (click)="cancelEditTestimonials()">❌ Cancel</button>
+              </div>
+            </div>
+          } @else {
+            <div class="settings-display">
+              @for (testimonial of currentTestimonials; track testimonial) {
+                <div class="testimonial-preview">
+                  <p class="preview-text">"{{ testimonial.text }}"</p>
+                  <p class="preview-author">- {{ testimonial.name }}, {{ testimonial.role }}</p>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="data-card enhanced-card settings-card">
+          <div class="card-header">
+            <div class="card-main">
+              <div class="card-icon">❓</div>
+              <div class="card-info">
+                <h3>FAQs</h3>
+                <p class="card-subtitle">Edit frequently asked questions</p>
+              </div>
+            </div>
+            @if (!editingFAQs()) {
+              <button class="edit-btn" (click)="startEditFAQs()">✏️ Edit</button>
+            }
+          </div>
+          @if (editingFAQs()) {
+            <div class="edit-form">
+              @for (faq of faqsForm; track faq; let i = $index) {
+                <div class="faq-edit-item">
+                  <div class="form-group">
+                    <label>Question</label>
+                    <input type="text" [(ngModel)]="faq.question" placeholder="Question" />
+                  </div>
+                  <div class="form-group">
+                    <label>Answer</label>
+                    <textarea [(ngModel)]="faq.answer" rows="2" placeholder="Answer"></textarea>
+                  </div>
+                  <button class="remove-btn" (click)="removeFAQ(i)">Remove</button>
+                </div>
+              }
+              <button class="add-btn" (click)="addFAQ()">+ Add FAQ</button>
+              <div class="edit-actions">
+                <button class="save-btn" (click)="saveFAQs()">💾 Save</button>
+                <button class="cancel-btn" (click)="cancelEditFAQs()">❌ Cancel</button>
+              </div>
+            </div>
+          } @else {
+            <div class="settings-display">
+              @for (faq of currentFAQs; track faq) {
+                <div class="faq-preview">
+                  <p class="preview-question">Q: {{ faq.question }}</p>
+                  <p class="preview-answer">A: {{ faq.answer }}</p>
+                </div>
+              }
+            </div>
+          }
+        </div>
       </div>
     }
   </div>

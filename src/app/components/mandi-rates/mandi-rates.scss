@@ -1,19 +1,57 @@
 .mandi-rates {
-  padding: 50px 20px;
-  background: #fff;
+  padding: 70px 20px;
+  background: linear-gradient(135deg, #fff 0%, #f8f6f0 50%, #e8f0e0 100%);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -20%;
+    right: -10%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(58, 90, 44, 0.04) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -20%;
+    left: -10%;
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, rgba(58, 90, 44, 0.03) 0%, transparent 70%);
+    border-radius: 50%;
+  }
 }
 
 .mandi-rates-container {
   max-width: 900px;
   margin: 0 auto;
   text-align: center;
+  position: relative;
+  z-index: 1;
 }
 
 .section-title {
-  font-size: 1.6rem;
+  font-size: 2rem;
   color: #2c2c2c;
   font-weight: 700;
   margin-bottom: 8px;
+  position: relative;
+  display: inline-block;
+
+  &::after {
+    content: '';
+    display: block;
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-green), #5a8a3a);
+    margin: 12px auto 0;
+    border-radius: 2px;
+  }
 }
 
 .subtitle-row {
@@ -21,165 +59,281 @@
   align-items: center;
   justify-content: center;
   gap: 15px;
-  margin-bottom: 25px;
+  margin-bottom: 35px;
   flex-wrap: wrap;
 }
 
 .subtitle {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   color: #555;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(58, 90, 44, 0.1);
+
+  strong {
+    color: var(--primary-green);
+    font-weight: 600;
+  }
 }
 
 .mandi-select {
   select {
-    padding: 10px 14px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
+    padding: 12px 18px;
+    border: 2px solid rgba(58, 90, 44, 0.2);
+    border-radius: 8px;
     font-family: 'Poppins', sans-serif;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     color: #333;
     background: #fff;
     cursor: pointer;
     outline: none;
     min-height: 44px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(58, 90, 44, 0.08);
 
     &:focus {
-      border-color: #3a5a2c;
+      border-color: var(--primary-green);
+      box-shadow: 0 4px 12px rgba(58, 90, 44, 0.15);
+    }
+
+    &:hover {
+      border-color: rgba(58, 90, 44, 0.4);
     }
   }
 }
 
 .rates-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 18px;
-  margin-bottom: 30px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  margin-bottom: 40px;
   text-align: left;
 }
 
 .rate-card {
   background: #fff;
-  border-radius: 14px;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
-  border: 1px solid #e8f0e0;
-  transition: box-shadow 0.3s, transform 0.2s;
+  box-shadow: 0 4px 20px rgba(58, 90, 44, 0.08);
+  border: 1px solid rgba(58, 90, 44, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-green), #5a8a3a);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
 
   &:hover {
-    box-shadow: 0 6px 20px rgba(58, 90, 44, 0.12);
-    transform: translateY(-2px);
+    box-shadow: 0 8px 35px rgba(58, 90, 44, 0.15);
+    transform: translateY(-8px);
+
+    &::before {
+      transform: scaleX(1);
+    }
+
+    .rate-card-img .crop-img {
+      transform: scale(1.05);
+    }
   }
 }
 
 .rate-card-img {
   width: 100%;
-  height: 140px;
+  height: 160px;
   overflow: hidden;
   background: #e8f0e0;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.1), transparent);
+  }
 
   .crop-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
+    transition: transform 0.4s ease;
   }
 }
 
 .rate-card-header {
-  padding: 12px 18px 8px;
+  padding: 16px 20px 12px;
   background: linear-gradient(135deg, #e8f0e0 0%, #d4e4c8 100%);
   border-bottom: 1px solid #d4e4c8;
+  position: relative;
 
   .crop-name {
-    font-size: 1.05rem;
+    font-size: 1.15rem;
     font-weight: 700;
     color: #2c2c2c;
     margin: 0;
+    text-transform: capitalize;
   }
 }
 
 .rate-card-body {
-  padding: 14px 18px;
+  padding: 18px 20px;
+  background: #fff;
 }
 
 .grade-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 0;
+  padding: 12px 0;
   border-bottom: 1px solid #f0f0f0;
+  transition: background 0.2s ease;
+  border-radius: 4px;
+  padding-left: 8px;
+  padding-right: 8px;
 
   &:last-child {
     border-bottom: none;
+  }
+
+  &:hover {
+    background: #f8f6f0;
   }
 }
 
 .grade-label {
   font-size: 0.85rem;
   color: #666;
-  font-weight: 500;
+  font-weight: 600;
+  letter-spacing: 0.3px;
 }
 
 .grade-price {
-  font-size: 0.9rem;
-  font-weight: 600;
+  font-size: 0.95rem;
+  font-weight: 700;
   color: #2c2c2c;
+  padding: 4px 12px;
+  border-radius: 12px;
+  background: #f8f6f0;
 
-  &.grade-a { color: #1a7a1a; }
-  &.grade-b { color: #3a5a2c; }
-  &.grade-c { color: #666; }
+  &.grade-a {
+    color: #1a7a1a;
+    background: #e8f0e0;
+  }
+  &.grade-b {
+    color: #3a5a2c;
+    background: #f0f5eb;
+  }
+  &.grade-c {
+    color: #666;
+    background: #f5f5f5;
+  }
 }
 
 .call-cta {
-  margin-top: 10px;
+  margin-top: 30px;
+  padding: 30px;
+  background: linear-gradient(135deg, #e8f0e0 0%, #d4e4c8 100%);
+  border-radius: 16px;
+  border: 2px solid rgba(58, 90, 44, 0.1);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(58, 90, 44, 0.08) 0%, transparent 70%);
+    border-radius: 50%;
+  }
 }
 
 .call-btn {
-  display: inline-block;
-  background: #3a5a2c;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, var(--primary-green) 0%, #2d4a1f 100%);
   color: #fff;
-  padding: 12px 40px;
-  border-radius: 8px;
-  font-size: 1rem;
+  padding: 16px 48px;
+  border-radius: 12px;
+  font-size: 1.1rem;
   font-weight: 700;
   letter-spacing: 0.5px;
-  transition: background 0.3s;
-  border: 2px solid #3a5a2c;
+  transition: all 0.3s ease;
+  border: none;
+  box-shadow: 0 4px 20px rgba(58, 90, 44, 0.25);
+  position: relative;
+  z-index: 1;
+  text-decoration: none;
 
   &:hover {
-    background: #2d4a1f;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(58, 90, 44, 0.35);
+  }
+
+  &:active {
+    transform: translateY(-1px);
   }
 }
 
 .call-subtitle {
-  margin-top: 8px;
-  font-size: 0.85rem;
-  color: #777;
+  margin-top: 12px;
+  font-size: 0.9rem;
+  color: #555;
+  font-weight: 500;
+  position: relative;
+  z-index: 1;
 }
 
 .skeleton-card {
   background: #fff;
-  border-radius: 14px;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
-  border: 1px solid #e8f0e0;
+  box-shadow: 0 4px 20px rgba(58, 90, 44, 0.08);
+  border: 1px solid rgba(58, 90, 44, 0.1);
 }
 
 .skeleton-img {
   width: 100%;
-  height: 140px;
+  height: 160px;
   background: linear-gradient(90deg, #e8f0e0 25%, #f0f5eb 50%, #e8f0e0 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.1), transparent);
+  }
 }
 
 .skeleton-header {
-  padding: 12px 18px 8px;
-  background: #e8f0e0;
+  padding: 16px 20px 12px;
+  background: linear-gradient(135deg, #e8f0e0 0%, #d4e4c8 100%);
+  border-bottom: 1px solid #d4e4c8;
 }
 
 .skeleton-body {
-  padding: 14px 18px;
+  padding: 18px 20px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -191,12 +345,18 @@
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 4px;
-  &.wide { width: 60%; }
+  &.wide {
+    width: 60%;
+  }
 }
 
 @keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 @media (max-width: 600px) {

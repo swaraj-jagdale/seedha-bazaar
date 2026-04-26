@@ -41,21 +41,21 @@ export class FarmerDashboard implements OnDestroy {
     let rates = this.ratesService.allRates();
     const crop = this.filterCrop();
     const mandi = this.filterMandi();
-    if (crop) rates = rates.filter(r => r.crop.toLowerCase().includes(crop.toLowerCase()));
-    if (mandi) rates = rates.filter(r => r.mandi === mandi);
+    if (crop) rates = rates.filter((r) => r.crop.toLowerCase().includes(crop.toLowerCase()));
+    if (mandi) rates = rates.filter((r) => r.mandi === mandi);
     return rates;
   });
 
   activeOrders = computed(() =>
-    this.orderService.farmerOrders().filter(o =>
-      !['paid', 'rejected', 'cancelled'].includes(o.status)
-    )
+    this.orderService
+      .farmerOrders()
+      .filter((o) => !['paid', 'rejected', 'cancelled'].includes(o.status)),
   );
 
   pastOrders = computed(() =>
-    this.orderService.farmerOrders().filter(o =>
-      ['paid', 'rejected', 'cancelled'].includes(o.status)
-    )
+    this.orderService
+      .farmerOrders()
+      .filter((o) => ['paid', 'rejected', 'cancelled'].includes(o.status)),
   );
 
   constructor(
@@ -63,7 +63,7 @@ export class FarmerDashboard implements OnDestroy {
     public ratesService: RatesService,
     public orderService: OrderService,
     private router: Router,
-    public lang: LanguageService
+    public lang: LanguageService,
   ) {
     effect(() => {
       const user = this.authService.currentUser();
@@ -97,9 +97,12 @@ export class FarmerDashboard implements OnDestroy {
 
   getPrice(rate: CropRate, grade: 'A' | 'B' | 'C'): { min: number; max: number } {
     switch (grade) {
-      case 'A': return { min: rate.gradeAMin, max: rate.gradeAMax };
-      case 'B': return { min: rate.gradeBMin, max: rate.gradeBMax };
-      case 'C': return { min: rate.gradeCMin, max: rate.gradeCMax };
+      case 'A':
+        return { min: rate.gradeAMin, max: rate.gradeAMax };
+      case 'B':
+        return { min: rate.gradeBMin, max: rate.gradeBMax };
+      case 'C':
+        return { min: rate.gradeCMin, max: rate.gradeCMax };
     }
   }
 
@@ -152,6 +155,9 @@ export class FarmerDashboard implements OnDestroy {
       return;
     }
 
+    // Ensure notes is handled correctly - allow empty string
+    const notes = this.orderNotes.trim();
+
     this.submittingOrder.set(true);
     this.orderError.set('');
 
@@ -163,7 +169,11 @@ export class FarmerDashboard implements OnDestroy {
       if (this.orderUnit === 'box') qtyKg *= 20;
 
       const totalAmount = pricePerUnit * qtyKg;
-      const { commission, commissionRate } = this.orderService.calculateCommission(pricePerUnit, qtyKg, rate.crop);
+      const { commission, commissionRate } = this.orderService.calculateCommission(
+        pricePerUnit,
+        qtyKg,
+        rate.crop,
+      );
 
       await this.orderService.createOrder({
         farmerId: user.uid,
@@ -186,7 +196,7 @@ export class FarmerDashboard implements OnDestroy {
         commissionRate,
         netAmount: totalAmount - commission,
         status: 'requested',
-        farmerNotes: this.orderNotes || undefined,
+        farmerNotes: notes || undefined,
       });
 
       this.closeOrderForm();
@@ -207,7 +217,7 @@ export class FarmerDashboard implements OnDestroy {
       this.lang.t('farmerDashboard.confirmCancel'),
       async () => {
         await this.orderService.cancelOrder(order.id!);
-      }
+      },
     );
   }
 
@@ -238,7 +248,7 @@ export class FarmerDashboard implements OnDestroy {
       async () => {
         await this.authService.logout();
         this.router.navigate(['/']);
-      }
+      },
     );
   }
 
