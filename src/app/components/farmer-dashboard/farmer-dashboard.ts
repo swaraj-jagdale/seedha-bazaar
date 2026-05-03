@@ -82,8 +82,12 @@ export class FarmerDashboard implements OnDestroy {
   }
 
   openOrderForm(rate: CropRate) {
+    if (!rate.grades || rate.grades.length === 0) {
+      alert('This rate has no grades available. Please contact the merchant.');
+      return;
+    }
     this.selectedRate.set(rate);
-    this.orderGrade = rate.grades[0]?.name || 'Grade A';
+    this.orderGrade = rate.grades[0].name;
     this.orderQuantity = 100;
     this.orderUnit = 'kg';
     this.orderNotes = '';

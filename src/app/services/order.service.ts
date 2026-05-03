@@ -267,28 +267,6 @@ export class OrderService {
     return STATUS_FLOW[idx + 1];
   }
 
-  calculateCommission(
-    pricePerUnit: number,
-    quantity: number,
-    crop: string,
-  ): { commission: number; commissionRate: number } {
-    // Commission rates per kg based on crop type (from proposal: Rs 3-8/kg)
-    const rates: Record<string, number> = {
-      Broccoli: 4,
-      Grapes: 5,
-      Muskmelon: 3,
-      'Apple Ber': 3,
-      Onion: 3,
-      Tomato: 3,
-      Potato: 3,
-      Cauliflower: 3,
-      'Green Chilli': 4,
-    };
-    const commissionRate = rates[crop] || 4;
-    const commission = commissionRate * quantity;
-    return { commission, commissionRate };
-  }
-
   formatAmount(amount: number): string {
     return `₹${amount.toLocaleString('en-IN')}`;
   }

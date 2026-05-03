@@ -48,6 +48,7 @@ export class AdminDashboard implements OnDestroy {
 
   // Order status update
   updatingOrderId = signal<string | null>(null);
+  isUpdatingOrder = signal(false);
   newStatus = '';
   statusNote = '';
 
@@ -183,9 +184,12 @@ export class AdminDashboard implements OnDestroy {
   async saveRate() {
     const rate = this.editingRate();
     if (!rate?.id) return;
-    if (confirm(`Are you sure you want to save the changes to ${rate.crop}?`)) {
+    try {
       await this.adminService.updateRate(rate.id, { grades: this.editForm.grades });
       this.editingRate.set(null);
+    } catch (error) {
+      console.error('Failed to save rate:', error);
+      alert('Failed to save rate. Please try again.');
     }
   }
 
@@ -267,10 +271,13 @@ export class AdminDashboard implements OnDestroy {
   async saveRatePhoto() {
     const rate = this.editingRatePhoto();
     if (!rate?.id) return;
-    if (confirm(`Are you sure you want to update the photo for ${rate.crop}?`)) {
+    try {
       await this.adminService.updateRate(rate.id, { photo: this.photoPreview || undefined });
       this.editingRatePhoto.set(null);
       this.photoPreview = '';
+    } catch (error) {
+      console.error('Failed to update rate photo:', error);
+      alert('Failed to update photo. Please try again.');
     }
   }
 
@@ -314,15 +321,23 @@ export class AdminDashboard implements OnDestroy {
 
   async saveOrderStatus() {
     const id = this.updatingOrderId();
-    if (!id) return;
+    if (!id || this.isUpdatingOrder()) return;
     if (confirm(`Are you sure you want to update the order status to '${this.newStatus}'?`)) {
-      await this.adminService.updateOrderStatus(
-        id,
-        this.newStatus as OrderStatus,
-        this.statusNote || undefined,
-      );
-      await this.adminService.updateLogistics(id, this.logisticsForm);
-      this.updatingOrderId.set(null);
+      this.isUpdatingOrder.set(true);
+      try {
+        await this.adminService.updateOrderStatus(
+          id,
+          this.newStatus as OrderStatus,
+          this.statusNote || undefined,
+        );
+        await this.adminService.updateLogistics(id, this.logisticsForm);
+        this.updatingOrderId.set(null);
+      } catch (error) {
+        console.error('Failed to update order status:', error);
+        alert('Failed to update order status. Please try again.');
+      } finally {
+        this.isUpdatingOrder.set(false);
+      }
     }
   }
 
@@ -345,9 +360,12 @@ export class AdminDashboard implements OnDestroy {
   async saveOrderDetails() {
     const id = this.editingOrderDetails();
     if (!id) return;
-    if (confirm('Are you sure you want to update the order details?')) {
+    try {
       await this.adminService.updateOrderDetails(id, this.orderDetailsForm);
       this.editingOrderDetails.set(null);
+    } catch (error) {
+      console.error('Failed to update order details:', error);
+      alert('Failed to update order details. Please try again.');
     }
   }
 
@@ -380,27 +398,30 @@ export class AdminDashboard implements OnDestroy {
     const user = this.adminService.allUsers().find((u) => u.uid === uid);
     if (!user) return;
 
-    if (confirm(`Are you sure you want to update the profile for ${user.profile.displayName}?`)) {
-      const profileData: any = {
-        displayName: this.userForm.displayName,
-        email: this.userForm.email,
-        phone: this.userForm.phone,
-        district: this.userForm.district,
-        taluka: this.userForm.taluka,
-        pincode: this.userForm.pincode,
-      };
+    const profileData: any = {
+      displayName: this.userForm.displayName,
+      email: this.userForm.email,
+      phone: this.userForm.phone,
+      district: this.userForm.district,
+      taluka: this.userForm.taluka,
+      pincode: this.userForm.pincode,
+    };
 
-      if (user.role === 'merchant') {
-        profileData.address = this.userForm.address;
-      } else {
-        profileData.village = this.userForm.village;
-        profileData.crops = this.userForm.crops;
-        profileData.acreage = this.userForm.acreage;
-      }
+    if (user.role === 'merchant') {
+      profileData.address = this.userForm.address;
+    } else {
+      profileData.village = this.userForm.village;
+      profileData.crops = this.userForm.crops;
+      profileData.acreage = this.userForm.acreage;
+    }
 
+    try {
       await this.adminService.updateUserProfile(uid, user.role, profileData);
       await this.adminService.loadAllUsers();
       this.editingUserId.set(null);
+    } catch (error) {
+      console.error('Failed to update user profile:', error);
+      alert('Failed to update user profile. Please try again.');
     }
   }
 
@@ -474,9 +495,12 @@ export class AdminDashboard implements OnDestroy {
   }
 
   async saveHeroLocation() {
-    if (confirm('Are you sure you want to update the hero location message?')) {
+    try {
       await this.appSettingsService.updateHeroLocation(this.heroLocationForm);
       this.editingHeroLocation.set(false);
+    } catch (error) {
+      console.error('Failed to update hero location:', error);
+      alert('Failed to update hero location. Please try again.');
     }
   }
 
@@ -495,9 +519,12 @@ export class AdminDashboard implements OnDestroy {
   }
 
   async savePhoneNumber() {
-    if (confirm('Are you sure you want to update the phone number?')) {
+    try {
       await this.appSettingsService.updatePhoneNumber(this.phoneNumberForm);
       this.editingPhoneNumber.set(false);
+    } catch (error) {
+      console.error('Failed to update phone number:', error);
+      alert('Failed to update phone number. Please try again.');
     }
   }
 
@@ -517,9 +544,12 @@ export class AdminDashboard implements OnDestroy {
   }
 
   async saveTestimonials() {
-    if (confirm('Are you sure you want to update the testimonials?')) {
+    try {
       await this.appSettingsService.updateTestimonials(this.testimonialsForm);
       this.editingTestimonials.set(false);
+    } catch (error) {
+      console.error('Failed to update testimonials:', error);
+      alert('Failed to update testimonials. Please try again.');
     }
   }
 
@@ -547,9 +577,12 @@ export class AdminDashboard implements OnDestroy {
   }
 
   async saveFAQs() {
-    if (confirm('Are you sure you want to update the FAQs?')) {
+    try {
       await this.appSettingsService.updateFAQs(this.faqsForm);
       this.editingFAQs.set(false);
+    } catch (error) {
+      console.error('Failed to update FAQs:', error);
+      alert('Failed to update FAQs. Please try again.');
     }
   }
 
@@ -577,9 +610,12 @@ export class AdminDashboard implements OnDestroy {
   }
 
   async saveDefaultMandi() {
-    if (confirm('Are you sure you want to update the default mandi?')) {
+    try {
       await this.appSettingsService.updateDefaultMandi(this.defaultMandiForm);
       this.editingDefaultMandi.set(false);
+    } catch (error) {
+      console.error('Failed to update default mandi:', error);
+      alert('Failed to update default mandi. Please try again.');
     }
   }
 
@@ -594,9 +630,12 @@ export class AdminDashboard implements OnDestroy {
   }
 
   async saveMandiList() {
-    if (confirm('Are you sure you want to update the mandi list?')) {
+    try {
       await this.appSettingsService.updateMandiList(this.mandiListForm);
       this.editingMandiList.set(false);
+    } catch (error) {
+      console.error('Failed to update mandi list:', error);
+      alert('Failed to update mandi list. Please try again.');
     }
   }
 
@@ -628,9 +667,12 @@ export class AdminDashboard implements OnDestroy {
   }
 
   async saveStats() {
-    if (confirm('Are you sure you want to update the statistics?')) {
+    try {
       await this.appSettingsService.updateStats(this.statsForm);
       this.editingStats.set(false);
+    } catch (error) {
+      console.error('Failed to update statistics:', error);
+      alert('Failed to update statistics. Please try again.');
     }
   }
 

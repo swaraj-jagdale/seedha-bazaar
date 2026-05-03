@@ -146,6 +146,22 @@ export class RatesService {
   }
 
   async addRate(rate: Omit<CropRate, 'id' | 'createdAt' | 'updatedAt'>) {
+    // Validate grades
+    if (!rate.grades || rate.grades.length === 0) {
+      throw new Error('Rate must have at least one grade');
+    }
+    for (const grade of rate.grades) {
+      if (!grade.name || grade.name.trim() === '') {
+        throw new Error('Grade name cannot be empty');
+      }
+      if (grade.price === null || grade.price === undefined || grade.price < 0) {
+        throw new Error(`Grade price must be a non-negative number for ${grade.name}`);
+      }
+    }
+    // Validate platform fee
+    if (rate.platformFee !== undefined && rate.platformFee !== null && rate.platformFee < 0) {
+      throw new Error('Platform fee cannot be negative');
+    }
     return addDoc(this.ratesCollection, {
       ...rate,
       createdAt: serverTimestamp(),
@@ -154,6 +170,24 @@ export class RatesService {
   }
 
   async updateRate(id: string, rate: Partial<CropRate>) {
+    // Validate grades if provided
+    if (rate.grades) {
+      if (rate.grades.length === 0) {
+        throw new Error('Rate must have at least one grade');
+      }
+      for (const grade of rate.grades) {
+        if (!grade.name || grade.name.trim() === '') {
+          throw new Error('Grade name cannot be empty');
+        }
+        if (grade.price === null || grade.price === undefined || grade.price < 0) {
+          throw new Error(`Grade price must be a non-negative number for ${grade.name}`);
+        }
+      }
+    }
+    // Validate platform fee if provided
+    if (rate.platformFee !== undefined && rate.platformFee !== null && rate.platformFee < 0) {
+      throw new Error('Platform fee cannot be negative');
+    }
     const docRef = doc(db, 'rates', id);
     return updateDoc(docRef, {
       ...rate,
