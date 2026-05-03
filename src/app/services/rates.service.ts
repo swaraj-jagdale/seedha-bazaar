@@ -14,6 +14,13 @@ import {
   Timestamp,
 } from 'firebase/firestore';
 
+export type RateStatus = 'pending' | 'approved' | 'rejected';
+
+export interface Grade {
+  name: string;
+  price: number;
+}
+
 export interface CropRate {
   id?: string;
   merchantId: string;
@@ -21,12 +28,10 @@ export interface CropRate {
   mandi: string;
   crop: string;
   emoji: string;
-  gradeAMin: number;
-  gradeAMax: number;
-  gradeBMin: number;
-  gradeBMax: number;
-  gradeCMin: number;
-  gradeCMax: number;
+  photo?: string;
+  grades: Grade[];
+  platformFee?: number;
+  status?: RateStatus;
   createdAt?: Timestamp;
   updatedAt?: Timestamp;
 }
@@ -39,11 +44,11 @@ export class RatesService {
   merchantRates = signal<CropRate[]>([]);
 
   private cropImageMap: Record<string, string> = {
-    'Onion': 'assets/images/crops/onion.jpg',
-    'Tomato': 'assets/images/crops/tomato.jpg',
-    'Broccoli': 'assets/images/crops/broccoli.jpg',
-    'Potato': 'assets/images/crops/potato.jpg',
-    'Cauliflower': 'assets/images/crops/cauliflower.jpg',
+    Onion: 'assets/images/crops/onion.jpg',
+    Tomato: 'assets/images/crops/tomato.jpg',
+    Broccoli: 'assets/images/crops/broccoli.jpg',
+    Potato: 'assets/images/crops/potato.jpg',
+    Cauliflower: 'assets/images/crops/cauliflower.jpg',
     'Green Chilli': 'assets/images/crops/chilli.jpg',
   };
 
@@ -51,10 +56,19 @@ export class RatesService {
     return this.cropImageMap[cropName] || 'assets/images/crops/default.jpg';
   }
 
-  listenToAllRates(mandi?: string) {
+  listenToAllRates(mandi?: string, status?: RateStatus) {
     let q;
-    if (mandi) {
+    if (mandi && status) {
+      q = query(
+        this.ratesCollection,
+        where('mandi', '==', mandi),
+        where('status', '==', status),
+        orderBy('updatedAt', 'desc'),
+      );
+    } else if (mandi) {
       q = query(this.ratesCollection, where('mandi', '==', mandi), orderBy('updatedAt', 'desc'));
+    } else if (status) {
+      q = query(this.ratesCollection, where('status', '==', status), orderBy('updatedAt', 'desc'));
     } else {
       q = query(this.ratesCollection, orderBy('updatedAt', 'desc'));
     }
@@ -74,9 +88,18 @@ export class RatesService {
         this.allRates.set([]);
         // If index is missing, try without orderBy
         if (error.code === 'failed-precondition') {
-          const fallbackQ = mandi
-            ? query(this.ratesCollection, where('mandi', '==', mandi))
-            : query(this.ratesCollection);
+          const fallbackQ =
+            mandi && status
+              ? query(
+                  this.ratesCollection,
+                  where('mandi', '==', mandi),
+                  where('status', '==', status),
+                )
+              : mandi
+                ? query(this.ratesCollection, where('mandi', '==', mandi))
+                : status
+                  ? query(this.ratesCollection, where('status', '==', status))
+                  : query(this.ratesCollection);
           onSnapshot(fallbackQ, (snapshot) => {
             const rates: CropRate[] = [];
             snapshot.forEach((doc) => {
@@ -85,7 +108,7 @@ export class RatesService {
             this.allRates.set(rates);
           });
         }
-      }
+      },
     );
   }
 
@@ -93,7 +116,7 @@ export class RatesService {
     const q = query(
       this.ratesCollection,
       where('merchantId', '==', merchantId),
-      orderBy('updatedAt', 'desc')
+      orderBy('updatedAt', 'desc'),
     );
 
     return onSnapshot(
@@ -109,10 +132,7 @@ export class RatesService {
         console.error('Error listening to merchant rates:', error.message);
         // If index is missing, try without orderBy
         if (error.code === 'failed-precondition') {
-          const fallbackQ = query(
-            this.ratesCollection,
-            where('merchantId', '==', merchantId)
-          );
+          const fallbackQ = query(this.ratesCollection, where('merchantId', '==', merchantId));
           onSnapshot(fallbackQ, (snapshot) => {
             const rates: CropRate[] = [];
             snapshot.forEach((doc) => {
@@ -121,7 +141,7 @@ export class RatesService {
             this.merchantRates.set(rates);
           });
         }
-      }
+      },
     );
   }
 
@@ -146,7 +166,7 @@ export class RatesService {
     return deleteDoc(docRef);
   }
 
-  formatPrice(min: number, max: number): string {
-    return `₹ ${min.toLocaleString('en-IN')} - ${max.toLocaleString('en-IN')}`;
+  formatPrice(price: number): string {
+    return `₹ ${price.toLocaleString('en-IN')}`;
   }
 }

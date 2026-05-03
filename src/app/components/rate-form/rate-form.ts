@@ -1,7 +1,7 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
-import { RatesService, CropRate } from '../../services/rates.service';
+import { RatesService, CropRate, Grade } from '../../services/rates.service';
 import { LanguageService } from '../../services/language.service';
 
 @Component({
@@ -31,24 +31,24 @@ export class RateForm implements OnInit {
   customCropName = '';
   customCropEmoji = '';
   selectedMandi = 'Azadpur Mandi';
-  gradeAMin = 0;
-  gradeAMax = 0;
-  gradeBMin = 0;
-  gradeBMax = 0;
-  gradeCMin = 0;
-  gradeCMax = 0;
+  isCustomMandi = false;
+  customMandiName = '';
+  photo = '';
+  photoPreview = '';
+  grades: Grade[] = [{ name: 'Grade A', price: 0 }];
   error = '';
   loading = false;
 
   constructor(
     private authService: AuthService,
     private ratesService: RatesService,
-    public lang: LanguageService
+    public lang: LanguageService,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit() {
     if (this.editRate) {
-      const existingCrop = this.crops.find(c => c.name === this.editRate!.crop);
+      const existingCrop = this.crops.find((c) => c.name === this.editRate!.crop);
       if (existingCrop) {
         this.selectedCrop = this.editRate.crop;
       } else {
@@ -57,13 +57,17 @@ export class RateForm implements OnInit {
         this.customCropName = this.editRate.crop;
         this.customCropEmoji = this.editRate.emoji;
       }
-      this.selectedMandi = this.editRate.mandi;
-      this.gradeAMin = this.editRate.gradeAMin;
-      this.gradeAMax = this.editRate.gradeAMax;
-      this.gradeBMin = this.editRate.gradeBMin;
-      this.gradeBMax = this.editRate.gradeBMax;
-      this.gradeCMin = this.editRate.gradeCMin;
-      this.gradeCMax = this.editRate.gradeCMax;
+      const existingMandi = this.mandis.find((m) => m === this.editRate!.mandi);
+      if (existingMandi) {
+        this.selectedMandi = this.editRate.mandi;
+      } else {
+        this.selectedMandi = '__custom__';
+        this.isCustomMandi = true;
+        this.customMandiName = this.editRate.mandi;
+      }
+      this.photo = this.editRate.photo || '';
+      this.photoPreview = this.editRate.photo || '';
+      this.grades = this.editRate.grades || [{ name: 'Grade A', price: 0 }];
     }
   }
 
@@ -72,6 +76,13 @@ export class RateForm implements OnInit {
     if (!this.isCustomCrop) {
       this.customCropName = '';
       this.customCropEmoji = '';
+    }
+  }
+
+  onMandiChange() {
+    this.isCustomMandi = this.selectedMandi === '__custom__';
+    if (!this.isCustomMandi) {
+      this.customMandiName = '';
     }
   }
 
@@ -89,6 +100,13 @@ export class RateForm implements OnInit {
     return this.crops.find((c) => c.name === this.selectedCrop)?.emoji || '';
   }
 
+  getMandiName(): string {
+    if (this.isCustomMandi) {
+      return this.customMandiName;
+    }
+    return this.selectedMandi;
+  }
+
   async onSubmit() {
     this.error = '';
 
@@ -102,8 +120,18 @@ export class RateForm implements OnInit {
       return;
     }
 
-    if (this.gradeAMin <= 0 || this.gradeAMax <= 0) {
-      this.error = 'Please enter valid Grade A prices';
+    if (this.isCustomMandi && !this.customMandiName.trim()) {
+      this.error = 'Please enter the mandi name';
+      return;
+    }
+
+    if (this.grades.length === 0) {
+      this.error = 'Please add at least one grade';
+      return;
+    }
+
+    if (this.grades.some((g) => g.price <= 0)) {
+      this.error = 'Please enter valid prices for all grades';
       return;
     }
 
@@ -116,15 +144,13 @@ export class RateForm implements OnInit {
       const rateData = {
         merchantId: user.uid,
         merchantName: user.displayName || 'Unknown',
-        mandi: this.selectedMandi,
+        mandi: this.getMandiName(),
         crop: this.getCropName(),
         emoji: this.getEmoji(),
-        gradeAMin: this.gradeAMin,
-        gradeAMax: this.gradeAMax,
-        gradeBMin: this.gradeBMin,
-        gradeBMax: this.gradeBMax,
-        gradeCMin: this.gradeCMin,
-        gradeCMax: this.gradeCMax,
+        photo: this.photo || undefined,
+        grades: this.grades,
+        platformFee: 0,
+        status: 'pending' as const,
       };
 
       if (this.editRate?.id) {
@@ -143,5 +169,52 @@ export class RateForm implements OnInit {
 
   cancel() {
     this.cancelled.emit();
+  }
+
+  onPhotoUpload(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      this.error = 'Please select an image file';
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      this.error = 'Image size must be less than 5MB';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.photoPreview = reader.result as string;
+      this.photo = reader.result as string;
+      this.cdr.detectChanges();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  removePhoto() {
+    this.photo = '';
+    this.photoPreview = '';
+  }
+
+  addGrade() {
+    if (this.grades.length >= 3) {
+      this.error = 'Maximum 3 grades allowed';
+      return;
+    }
+    const defaultNames = ['Grade A', 'Grade B', 'Grade C'];
+    const nextIndex = this.grades.length;
+    this.grades.push({ name: defaultNames[nextIndex] || `Grade ${nextIndex + 1}`, price: 0 });
+  }
+
+  removeGrade(index: number) {
+    if (this.grades.length <= 1) {
+      this.error = 'At least one grade is required';
+      return;
+    }
+    this.grades.splice(index, 1);
   }
 }

@@ -32,36 +32,36 @@
         }
       </div>
     } @else {
-      <div class="rates-grid">
-        @for (crop of displayRates(); track crop.name) {
-          <div class="rate-card">
-            <div class="rate-card-img">
-              <img
-                [src]="ratesService.getCropImage(crop.name)"
-                [alt]="crop.name"
-                class="crop-img"
-              />
-            </div>
-            <div class="rate-card-header">
-              <h3 class="crop-name">{{ crop.name }}</h3>
-            </div>
-            <div class="rate-card-body">
-              <div class="grade-row">
-                <span class="grade-label">{{ lang.t('rates.gradeA') }}</span>
-                <span class="grade-price grade-a">{{ crop.gradeA }}/kg</span>
+      @if (displayRates().length === 0) {
+        <div class="no-rates">
+          <p>{{ lang.t('rates.noRatesAvailable') }}</p>
+        </div>
+      } @else {
+        <div class="rates-grid">
+          @for (crop of displayRates(); track crop.name) {
+            <div class="rate-card">
+              <div class="rate-card-img">
+                <img
+                  [src]="ratesService.getCropImage(crop.name)"
+                  [alt]="crop.name"
+                  class="crop-img"
+                />
               </div>
-              <div class="grade-row">
-                <span class="grade-label">{{ lang.t('rates.gradeB') }}</span>
-                <span class="grade-price grade-b">{{ crop.gradeB }}/kg</span>
+              <div class="rate-card-header">
+                <h3 class="crop-name">{{ crop.name }}</h3>
               </div>
-              <div class="grade-row">
-                <span class="grade-label">{{ lang.t('rates.gradeC') }}</span>
-                <span class="grade-price grade-c">{{ crop.gradeC }}/kg</span>
+              <div class="rate-card-body">
+                @for (grade of crop.grades; track grade.name) {
+                  <div class="grade-row">
+                    <span class="grade-label">{{ grade.name }}</span>
+                    <span class="grade-price">{{ ratesService.formatPrice(grade.price) }}/kg</span>
+                  </div>
+                }
               </div>
             </div>
-          </div>
-        }
-      </div>
+          }
+        </div>
+      }
     }
 
     <div class="call-cta">

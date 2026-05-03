@@ -73,17 +73,155 @@
   margin-bottom: 12px;
 }
 
-.grade-section {
+.custom-mandi-row {
+  background: #f0f8e8;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px dashed #3a5a2c;
+  margin-bottom: 12px;
+}
+
+.photo-section {
+  margin-bottom: 15px;
+
+  label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 8px;
+  }
+
+  .photo-upload {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .photo-preview {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid #3a5a2c;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .remove-photo-btn {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 24px;
+      height: 24px;
+      background: #c82333;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s;
+
+      &:hover {
+        background: #a01826;
+      }
+    }
+  }
+
+  .photo-input-wrapper {
+    flex: 1;
+
+    input[type='file'] {
+      display: none;
+    }
+
+    .upload-btn {
+      padding: 10px 20px;
+      background: #3a5a2c;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: background 0.3s;
+      display: inline-block;
+
+      &:hover {
+        background: #2d4a1f;
+      }
+    }
+  }
+}
+
+.grades-section {
   background: #fafaf5;
-  padding: 14px;
+  padding: 16px;
   border-radius: 8px;
   margin-bottom: 12px;
+  border: 1px solid #e0e0e0;
 
   h4 {
-    font-size: 0.85rem;
+    font-size: 0.95rem;
     font-weight: 600;
     color: #3a5a2c;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
+  }
+
+  .grade-item {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 10px;
+    align-items: start;
+    margin-bottom: 12px;
+
+    .form-group {
+      margin-bottom: 0;
+    }
+
+    .remove-grade-btn {
+      width: 32px;
+      height: 32px;
+      background: #c82333;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s;
+      margin-top: 24px;
+
+      &:hover {
+        background: #a01826;
+      }
+    }
+  }
+
+  .add-grade-btn {
+    width: 100%;
+    padding: 10px 16px;
+    background: #3a5a2c;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: background 0.3s;
+
+    &:hover {
+      background: #2d4a1f;
+    }
   }
 }
 

@@ -190,6 +190,43 @@
       border-radius: 4px;
       font-weight: 500;
     }
+
+    .merchant-name {
+      font-size: 0.75rem;
+      color: #666;
+      margin-left: 4px;
+    }
+
+    .status-badge {
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      text-transform: capitalize;
+
+      &.status-pending {
+        background: #fff3cd;
+        color: #856404;
+      }
+
+      &.status-approved {
+        background: #d4edda;
+        color: #155724;
+      }
+
+      &.status-rejected {
+        background: #f8d7da;
+        color: #721c24;
+      }
+    }
+
+    .rate-photo {
+      width: 100%;
+      height: 120px;
+      border-radius: 8px;
+      object-fit: cover;
+      margin-bottom: 8px;
+    }
   }
 }
 

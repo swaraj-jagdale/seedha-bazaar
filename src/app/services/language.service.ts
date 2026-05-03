@@ -33,6 +33,7 @@ const en: TranslationMap = {
   'rates.gradeC': 'GRADE C',
   'rates.callNow': 'CALL NOW',
   'rates.callSubtitle': 'Call or WhatsApp if any questions',
+  'rates.noRatesAvailable': 'No rates available for this mandi',
 
   // How It Works
   'howItWorks.title': 'How It Works',
@@ -103,7 +104,7 @@ const en: TranslationMap = {
   'dashboard.logout': 'Logout',
   'dashboard.yourRates': 'Your Submitted Rates',
   'dashboard.emptyState1': "You haven't submitted any rates yet.",
-  'dashboard.emptyState2': 'Click "Add New Rate" to get started.',
+  'dashboard.emptyState2': 'Click "नवीन भाव जोडा" to get started.',
 
   // Rate Form
   'rateForm.addTitle': 'Add New Rate',
@@ -113,7 +114,12 @@ const en: TranslationMap = {
   'rateForm.customCrop': 'Custom (other)',
   'rateForm.cropName': 'Crop Name',
   'rateForm.cropEmoji': 'Emoji (optional)',
+  'rateForm.photo': 'Photo',
+  'rateForm.uploadPhoto': 'Upload Photo',
+  'rateForm.changePhoto': 'Change Photo',
   'rateForm.mandi': 'Mandi',
+  'rateForm.customMandi': 'Custom Mandi',
+  'rateForm.mandiName': 'Mandi Name',
   'rateForm.gradeA': 'Grade A (Best Quality)',
   'rateForm.gradeB': 'Grade B (Medium Quality)',
   'rateForm.gradeC': 'Grade C (Standard Quality)',
@@ -260,6 +266,8 @@ const hi: TranslationMap = {
   'rates.callNow': '\u0905\u092D\u0940 \u0915\u0949\u0932 \u0915\u0930\u0947\u0902',
   'rates.callSubtitle':
     '\u0915\u093F\u0938\u0940 \u092D\u0940 \u0938\u0935\u093E\u0932 \u0915\u0947 \u0932\u093F\u090F \u0915\u0949\u0932 \u092F\u093E \u0935\u094D\u0939\u093E\u091F\u094D\u0938\u090F\u092A \u0915\u0930\u0947\u0902',
+  'rates.noRatesAvailable':
+    '\u0907\u0938 \u092E\u0902\u0921\u0940 \u0915\u0947 \u0932\u093F\u090F \u0915\u094B\u0908 \u092D\u093E\u0935 \u0909\u092A\u0932\u092C\u094D\u0927 \u0928\u0939\u0940\u0902 \u0939\u0948',
 
   // How It Works
   'howItWorks.title':
@@ -370,7 +378,13 @@ const hi: TranslationMap = {
   'rateForm.cropName': '\u092B\u0938\u0932 \u0915\u093E \u0928\u093E\u092E',
   'rateForm.cropEmoji':
     '\u0907\u092E\u094B\u091C\u0940 (\u0935\u0948\u0915\u0932\u094D\u092A\u093F\u0915)',
+  'rateForm.photo': '\u092B\u094B\u091F\u094B',
+  'rateForm.uploadPhoto':
+    '\u092B\u094B\u091F\u094B \u0905\u092A\u0932\u094B\u0921 \u0915\u0930\u0947\u0902',
+  'rateForm.changePhoto': '\u092B\u094B\u091F\u094B \u092C\u0926\u0932\u0947\u0902',
   'rateForm.mandi': '\u092E\u0902\u0921\u0940',
+  'rateForm.customMandi': '\u0915\u0938\u094D\u091F\u092E \u092E\u0902\u0921\u0940',
+  'rateForm.mandiName': '\u092E\u0902\u0921\u0940 \u0915\u093E \u0928\u093E\u092E',
   'rateForm.gradeA':
     '\u0917\u094D\u0930\u0947\u0921 A (\u0938\u0930\u094D\u0935\u0936\u094D\u0930\u0947\u0937\u094D\u0920 \u0917\u0941\u0923\u0935\u0924\u094D\u0924\u093E)',
   'rateForm.gradeB':
@@ -557,6 +571,8 @@ const mr: TranslationMap = {
   'rates.callNow': '\u0906\u0924\u094D\u0924\u093E \u0915\u0949\u0932 \u0915\u0930\u093E',
   'rates.callSubtitle':
     '\u0915\u094B\u0923\u0924\u094D\u092F\u093E\u0939\u0940 \u092A\u094D\u0930\u0936\u094D\u0928\u093E\u0938\u093E\u0920\u0940 \u0915\u0949\u0932 \u0915\u093F\u0902\u0935\u093E \u0935\u094D\u0939\u0949\u091F\u094D\u0938\u0905\u0945\u092A \u0915\u0930\u093E',
+  'rates.noRatesAvailable':
+    '\u0907\u092F \u092E\u0902\u0921\u0940\u0938\u093E\u0920\u0940 \u0915\u094B\u0923\u0924\u094D\u0930\u0940 \u0915\u094B\u0923\u0924\u093E\u0939\u0940 \u0909\u092A\u0932\u092C\u094D\u0927 \u0928\u093E\u0939\u0940',
 
   // How It Works
   'howItWorks.title': '\u0915\u0938\u0947 \u0915\u093E\u092E \u0915\u0930\u0924\u0947',
@@ -661,7 +677,13 @@ const mr: TranslationMap = {
   'rateForm.customCrop': '\u0907\u0924\u0930 (\u0915\u0938\u094D\u091F\u092E)',
   'rateForm.cropName': '\u092A\u093F\u0915\u093E\u091A\u0947 \u0928\u093E\u0935',
   'rateForm.cropEmoji': '\u0907\u092E\u094B\u091C\u0940 (\u0910\u091A\u094D\u091B\u093F\u0915)',
+  'rateForm.photo': '\u092B\u094B\u091F\u094B',
+  'rateForm.uploadPhoto':
+    '\u092B\u094B\u091F\u094B \u0905\u092A\u0932\u094B\u0921 \u0915\u0930\u093E',
+  'rateForm.changePhoto': '\u092B\u094B\u091F\u094B \u092C\u0926\u0932\u093E',
   'rateForm.mandi': '\u092E\u0902\u0921\u0940',
+  'rateForm.customMandi': '\u0907\u0924\u0930 \u092E\u0902\u0921\u0940',
+  'rateForm.mandiName': '\u092E\u0902\u0921\u0940\u091A\u0947 \u0928\u093E\u0935',
   'rateForm.gradeA':
     '\u0917\u094D\u0930\u0947\u0921 A (\u0938\u0930\u094D\u0935\u094B\u0924\u094D\u0924\u092E \u0917\u0941\u0923\u0935\u0924\u094D\u0924\u093E)',
   'rateForm.gradeB':

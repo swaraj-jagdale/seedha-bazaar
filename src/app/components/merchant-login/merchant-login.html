@@ -1,9 +1,11 @@
 <div class="login-page">
   <div class="login-card">
     <div class="login-header">
-      <img src="assets/images/logo.svg" alt="Seedha Bazaar Logo" width="40" height="40">
+      <img src="logo.jpg" alt="Seedha Bazaar Logo" width="60" height="60" />
       <h2>{{ isRegister() ? lang.t('login.registerTitle') : lang.t('login.title') }}</h2>
-      <p class="login-subtitle">{{ isRegister() ? lang.t('login.registerSubtitle') : lang.t('login.loginSubtitle') }}</p>
+      <p class="login-subtitle">
+        {{ isRegister() ? lang.t('login.registerSubtitle') : lang.t('login.loginSubtitle') }}
+      </p>
     </div>
 
     @if (error()) {
@@ -115,7 +117,13 @@
       </div>
 
       <button type="submit" class="submit-btn" [disabled]="loading()">
-        {{ loading() ? lang.t('login.pleaseWait') : (isRegister() ? lang.t('login.createAccount') : lang.t('login.loginBtn')) }}
+        {{
+          loading()
+            ? lang.t('login.pleaseWait')
+            : isRegister()
+              ? lang.t('login.createAccount')
+              : lang.t('login.loginBtn')
+        }}
       </button>
 
       @if (!isRegister()) {
@@ -136,17 +144,30 @@
           <input type="email" [(ngModel)]="resetEmail" placeholder="Your email address" />
         </div>
         <div class="reset-actions">
-          <button class="submit-btn" (click)="sendResetEmail()" [disabled]="loading()">Send Reset Email</button>
-          <button class="cancel-link" (click)="showForgotPassword.set(false); error.set(''); resetSuccess.set('')">Back to login</button>
+          <button class="submit-btn" (click)="sendResetEmail()" [disabled]="loading()">
+            Send Reset Email
+          </button>
+          <button
+            class="cancel-link"
+            (click)="showForgotPassword.set(false); error.set(''); resetSuccess.set('')"
+          >
+            Back to login
+          </button>
         </div>
       </div>
     }
 
     <div class="toggle-mode">
       @if (isRegister()) {
-        <p>{{ lang.t('login.alreadyAccount') }} <button (click)="toggleMode()">{{ lang.t('login.loginHere') }}</button></p>
+        <p>
+          {{ lang.t('login.alreadyAccount') }}
+          <button (click)="toggleMode()">{{ lang.t('login.loginHere') }}</button>
+        </p>
       } @else {
-        <p>{{ lang.t('login.newMerchant') }} <button (click)="toggleMode()">{{ lang.t('login.registerHere') }}</button></p>
+        <p>
+          {{ lang.t('login.newMerchant') }}
+          <button (click)="toggleMode()">{{ lang.t('login.registerHere') }}</button>
+        </p>
       }
     </div>
     <div class="farmer-link-container">

@@ -144,7 +144,7 @@ export class MerchantDashboard implements OnDestroy {
     });
   }
 
-  formatPrice(min: number, max: number): string {
-    return this.ratesService.formatPrice(min, max);
+  formatPrice(price: number): string {
+    return this.ratesService.formatPrice(price);
   }
 }

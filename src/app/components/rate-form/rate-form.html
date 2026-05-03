@@ -20,73 +20,132 @@
         </div>
         <div class="form-group">
           <label>{{ lang.t('rateForm.mandi') }}</label>
-          <select [(ngModel)]="selectedMandi" name="mandi" required>
+          <select
+            [(ngModel)]="selectedMandi"
+            name="mandi"
+            (ngModelChange)="onMandiChange()"
+            required
+          >
             @for (mandi of mandis; track mandi) {
               <option [value]="mandi">{{ mandi }}</option>
             }
+            <option value="__custom__">+ {{ lang.t('rateForm.customMandi') }}</option>
           </select>
         </div>
       </div>
+
+      @if (isCustomMandi) {
+        <div class="form-row custom-mandi-row">
+          <div class="form-group">
+            <label>{{ lang.t('rateForm.mandiName') }} *</label>
+            <input
+              type="text"
+              [(ngModel)]="customMandiName"
+              name="customMandiName"
+              placeholder="e.g. Nashik Mandi, Pune Mandi"
+              required
+            />
+          </div>
+        </div>
+      }
 
       @if (isCustomCrop) {
         <div class="form-row custom-crop-row">
           <div class="form-group">
             <label>{{ lang.t('rateForm.cropName') }} *</label>
-            <input type="text" [(ngModel)]="customCropName" name="customCropName" placeholder="e.g. Grapes, Banana" required />
+            <input
+              type="text"
+              [(ngModel)]="customCropName"
+              name="customCropName"
+              placeholder="e.g. Grapes, Banana"
+              required
+            />
           </div>
           <div class="form-group">
             <label>{{ lang.t('rateForm.cropEmoji') }}</label>
-            <input type="text" [(ngModel)]="customCropEmoji" name="customCropEmoji" placeholder="e.g. 🍇" />
+            <input
+              type="text"
+              [(ngModel)]="customCropEmoji"
+              name="customCropEmoji"
+              placeholder="e.g. 🍇"
+            />
           </div>
         </div>
       }
 
-      <div class="grade-section">
-        <h4>{{ lang.t('rateForm.gradeA') }}</h4>
-        <div class="price-row">
-          <div class="form-group">
-            <label>{{ lang.t('rateForm.minPrice') }} (₹)</label>
-            <input type="number" [(ngModel)]="gradeAMin" name="gradeAMin" placeholder="e.g. 2300" required />
-          </div>
-          <div class="form-group">
-            <label>{{ lang.t('rateForm.maxPrice') }} (₹)</label>
-            <input type="number" [(ngModel)]="gradeAMax" name="gradeAMax" placeholder="e.g. 2500" required />
-          </div>
-        </div>
-      </div>
-
-      <div class="grade-section">
-        <h4>{{ lang.t('rateForm.gradeB') }}</h4>
-        <div class="price-row">
-          <div class="form-group">
-            <label>{{ lang.t('rateForm.minPrice') }} (₹)</label>
-            <input type="number" [(ngModel)]="gradeBMin" name="gradeBMin" placeholder="e.g. 2000" required />
-          </div>
-          <div class="form-group">
-            <label>{{ lang.t('rateForm.maxPrice') }} (₹)</label>
-            <input type="number" [(ngModel)]="gradeBMax" name="gradeBMax" placeholder="e.g. 2300" required />
+      <div class="photo-section">
+        <label>{{ lang.t('rateForm.photo') }}</label>
+        <div class="photo-upload">
+          @if (photoPreview) {
+            <div class="photo-preview">
+              <img [src]="photoPreview" alt="Crop photo" />
+              <button type="button" class="remove-photo-btn" (click)="removePhoto()">×</button>
+            </div>
+          }
+          <div class="photo-input-wrapper">
+            <input
+              type="file"
+              accept="image/*"
+              (change)="onPhotoUpload($event)"
+              name="photo"
+              #photoInput
+            />
+            <button type="button" class="upload-btn" (click)="photoInput.click()">
+              {{ photoPreview ? lang.t('rateForm.changePhoto') : lang.t('rateForm.uploadPhoto') }}
+            </button>
           </div>
         </div>
       </div>
 
-      <div class="grade-section">
-        <h4>{{ lang.t('rateForm.gradeC') }}</h4>
-        <div class="price-row">
-          <div class="form-group">
-            <label>{{ lang.t('rateForm.minPrice') }} (₹)</label>
-            <input type="number" [(ngModel)]="gradeCMin" name="gradeCMin" placeholder="e.g. 1700" required />
+      <div class="grades-section">
+        <h4>Grades</h4>
+        @for (grade of grades; track $index) {
+          <div class="grade-item">
+            <div class="form-group">
+              <label>Grade Name</label>
+              <input
+                type="text"
+                [(ngModel)]="grades[$index].name"
+                [name]="'gradeName' + $index"
+                placeholder="e.g. Grade A"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label>Price (₹)</label>
+              <input
+                type="number"
+                [(ngModel)]="grades[$index].price"
+                [name]="'gradePrice' + $index"
+                placeholder="e.g. 2300"
+                required
+                min="0"
+              />
+            </div>
+            @if (grades.length > 1) {
+              <button type="button" class="remove-grade-btn" (click)="removeGrade($index)">
+                ×
+              </button>
+            }
           </div>
-          <div class="form-group">
-            <label>{{ lang.t('rateForm.maxPrice') }} (₹)</label>
-            <input type="number" [(ngModel)]="gradeCMax" name="gradeCMax" placeholder="e.g. 1900" required />
-          </div>
-        </div>
+        }
+        @if (grades.length < 3) {
+          <button type="button" class="add-grade-btn" (click)="addGrade()">+ Add Grade</button>
+        }
       </div>
 
       <div class="form-actions">
-        <button type="button" class="cancel-btn" (click)="cancel()">{{ lang.t('rateForm.cancel') }}</button>
+        <button type="button" class="cancel-btn" (click)="cancel()">
+          {{ lang.t('rateForm.cancel') }}
+        </button>
         <button type="submit" class="save-btn" [disabled]="loading">
-          {{ loading ? lang.t('rateForm.saving') : (editRate ? lang.t('rateForm.update') : lang.t('rateForm.save')) }}
+          {{
+            loading
+              ? lang.t('rateForm.saving')
+              : editRate
+                ? lang.t('rateForm.update')
+                : lang.t('rateForm.save')
+          }}
         </button>
       </div>
     </form>

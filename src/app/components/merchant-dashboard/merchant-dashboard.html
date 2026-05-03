@@ -76,29 +76,29 @@
                 </div>
                 <div class="rate-card-header">
                   <div class="crop-info">
+                    @if (rate.photo) {
+                      <img [src]="rate.photo" [alt]="rate.crop" class="rate-photo" />
+                    }
                     <h4>{{ rate.crop }}</h4>
                     <span class="mandi-tag">{{ rate.mandi }}</span>
+                    <span class="merchant-name">{{ rate.merchantName }}</span>
+                    <span
+                      class="status-badge"
+                      [class.status-pending]="rate.status === 'pending'"
+                      [class.status-approved]="rate.status === 'approved'"
+                      [class.status-rejected]="rate.status === 'rejected'"
+                    >
+                      {{ rate.status }}
+                    </span>
                   </div>
                 </div>
                 <div class="rate-card-body">
-                  <div class="grade-row">
-                    <span class="grade-label">{{ lang.t('rates.gradeA') }}</span>
-                    <span class="grade-price"
-                      >{{ formatPrice(rate.gradeAMin, rate.gradeAMax) }}/kg</span
-                    >
-                  </div>
-                  <div class="grade-row">
-                    <span class="grade-label">{{ lang.t('rates.gradeB') }}</span>
-                    <span class="grade-price"
-                      >{{ formatPrice(rate.gradeBMin, rate.gradeBMax) }}/kg</span
-                    >
-                  </div>
-                  <div class="grade-row">
-                    <span class="grade-label">{{ lang.t('rates.gradeC') }}</span>
-                    <span class="grade-price"
-                      >{{ formatPrice(rate.gradeCMin, rate.gradeCMax) }}/kg</span
-                    >
-                  </div>
+                  @for (grade of rate.grades; track grade.name) {
+                    <div class="grade-row">
+                      <span class="grade-label">{{ grade.name }}</span>
+                      <span class="grade-price">{{ formatPrice(grade.price) }}/kg</span>
+                    </div>
+                  }
                 </div>
               </div>
             }

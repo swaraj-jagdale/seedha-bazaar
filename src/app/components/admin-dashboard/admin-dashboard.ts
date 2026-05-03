@@ -1,10 +1,10 @@
 import { Component, OnDestroy, signal, computed } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
+import { RatesService, CropRate, Grade } from '../../services/rates.service';
+import { OrderService, Order, OrderStatus } from '../../services/order.service';
 import { AdminService, UserRecord } from '../../services/admin.service';
-import { RatesService, CropRate } from '../../services/rates.service';
-import { Order, OrderStatus } from '../../services/order.service';
 import { LanguageService } from '../../services/language.service';
 import { AppSettingsService } from '../../services/app-settings.service';
 
@@ -36,13 +36,14 @@ export class AdminDashboard implements OnDestroy {
 
   // Rate editing
   editingRate = signal<CropRate | null>(null);
+  editingRatePhoto = signal<CropRate | null>(null);
+  photoPreview = '';
+  approvingRate = signal<CropRate | null>(null);
+  approvalForm = {
+    platformFee: 0,
+  };
   editForm = {
-    gradeAMin: 0,
-    gradeAMax: 0,
-    gradeBMin: 0,
-    gradeBMax: 0,
-    gradeCMin: 0,
-    gradeCMax: 0,
+    grades: [] as Grade[],
   };
 
   // Order status update
@@ -171,12 +172,7 @@ export class AdminDashboard implements OnDestroy {
   startEditRate(rate: CropRate) {
     this.editingRate.set(rate);
     this.editForm = {
-      gradeAMin: rate.gradeAMin,
-      gradeAMax: rate.gradeAMax,
-      gradeBMin: rate.gradeBMin,
-      gradeBMax: rate.gradeBMax,
-      gradeCMin: rate.gradeCMin,
-      gradeCMax: rate.gradeCMax,
+      grades: [...rate.grades],
     };
   }
 
@@ -187,17 +183,106 @@ export class AdminDashboard implements OnDestroy {
   async saveRate() {
     const rate = this.editingRate();
     if (!rate?.id) return;
-    await this.adminService.updateRate(rate.id, this.editForm);
-    this.editingRate.set(null);
+    if (confirm(`Are you sure you want to save the changes to ${rate.crop}?`)) {
+      await this.adminService.updateRate(rate.id, { grades: this.editForm.grades });
+      this.editingRate.set(null);
+    }
+  }
+
+  // Rate approval
+  startApproveRate(rate: CropRate) {
+    this.approvingRate.set(rate);
+    this.approvalForm = {
+      platformFee: rate.platformFee ?? 0,
+    };
+  }
+
+  cancelApproveRate() {
+    this.approvingRate.set(null);
+  }
+
+  async approveRate() {
+    const rate = this.approvingRate();
+    if (!rate?.id) return;
+    if (confirm(`Are you sure you want to approve the rate for ${rate.crop}?`)) {
+      await this.adminService.updateRate(rate.id, {
+        platformFee: this.approvalForm.platformFee,
+        status: 'approved' as const,
+      });
+      this.approvingRate.set(null);
+    }
+  }
+
+  async rejectRate(rate: CropRate) {
+    if (!rate.id) return;
+    if (confirm(`Are you sure you want to reject the rate for ${rate.crop}?`)) {
+      await this.adminService.updateRate(rate.id, { status: 'rejected' as const });
+    }
   }
 
   async deleteRate(rate: CropRate) {
     if (!rate.id) return;
-    await this.adminService.deleteRate(rate.id);
+    if (
+      confirm(
+        `Are you sure you want to delete the rate for ${rate.crop}? This action cannot be undone.`,
+      )
+    ) {
+      await this.adminService.deleteRate(rate.id);
+    }
   }
 
-  formatPrice(min: number, max: number): string {
-    return this.ratesService.formatPrice(min, max);
+  // Rate photo editing
+  startEditRatePhoto(rate: CropRate) {
+    this.editingRatePhoto.set(rate);
+    this.photoPreview = rate.photo || '';
+  }
+
+  cancelEditRatePhoto() {
+    this.editingRatePhoto.set(null);
+    this.photoPreview = '';
+  }
+
+  onPhotoUpload(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image size must be less than 5MB');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.photoPreview = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  async saveRatePhoto() {
+    const rate = this.editingRatePhoto();
+    if (!rate?.id) return;
+    if (confirm(`Are you sure you want to update the photo for ${rate.crop}?`)) {
+      await this.adminService.updateRate(rate.id, { photo: this.photoPreview || undefined });
+      this.editingRatePhoto.set(null);
+      this.photoPreview = '';
+    }
+  }
+
+  async removeRatePhoto(rate: CropRate) {
+    if (!rate.id) return;
+    if (confirm(`Are you sure you want to remove the photo for ${rate.crop}?`)) {
+      await this.adminService.updateRate(rate.id, { photo: undefined });
+    }
+  }
+
+  formatPrice(price: number): string {
+    return this.ratesService.formatPrice(price);
   }
 
   // Orders
@@ -230,13 +315,15 @@ export class AdminDashboard implements OnDestroy {
   async saveOrderStatus() {
     const id = this.updatingOrderId();
     if (!id) return;
-    await this.adminService.updateOrderStatus(
-      id,
-      this.newStatus as OrderStatus,
-      this.statusNote || undefined,
-    );
-    await this.adminService.updateLogistics(id, this.logisticsForm);
-    this.updatingOrderId.set(null);
+    if (confirm(`Are you sure you want to update the order status to '${this.newStatus}'?`)) {
+      await this.adminService.updateOrderStatus(
+        id,
+        this.newStatus as OrderStatus,
+        this.statusNote || undefined,
+      );
+      await this.adminService.updateLogistics(id, this.logisticsForm);
+      this.updatingOrderId.set(null);
+    }
   }
 
   // Order details editing
@@ -258,8 +345,10 @@ export class AdminDashboard implements OnDestroy {
   async saveOrderDetails() {
     const id = this.editingOrderDetails();
     if (!id) return;
-    await this.adminService.updateOrderDetails(id, this.orderDetailsForm);
-    this.editingOrderDetails.set(null);
+    if (confirm('Are you sure you want to update the order details?')) {
+      await this.adminService.updateOrderDetails(id, this.orderDetailsForm);
+      this.editingOrderDetails.set(null);
+    }
   }
 
   // User profile editing
@@ -291,26 +380,28 @@ export class AdminDashboard implements OnDestroy {
     const user = this.adminService.allUsers().find((u) => u.uid === uid);
     if (!user) return;
 
-    const profileData: any = {
-      displayName: this.userForm.displayName,
-      email: this.userForm.email,
-      phone: this.userForm.phone,
-      district: this.userForm.district,
-      taluka: this.userForm.taluka,
-      pincode: this.userForm.pincode,
-    };
+    if (confirm(`Are you sure you want to update the profile for ${user.profile.displayName}?`)) {
+      const profileData: any = {
+        displayName: this.userForm.displayName,
+        email: this.userForm.email,
+        phone: this.userForm.phone,
+        district: this.userForm.district,
+        taluka: this.userForm.taluka,
+        pincode: this.userForm.pincode,
+      };
 
-    if (user.role === 'merchant') {
-      profileData.address = this.userForm.address;
-    } else {
-      profileData.village = this.userForm.village;
-      profileData.crops = this.userForm.crops;
-      profileData.acreage = this.userForm.acreage;
+      if (user.role === 'merchant') {
+        profileData.address = this.userForm.address;
+      } else {
+        profileData.village = this.userForm.village;
+        profileData.crops = this.userForm.crops;
+        profileData.acreage = this.userForm.acreage;
+      }
+
+      await this.adminService.updateUserProfile(uid, user.role, profileData);
+      await this.adminService.loadAllUsers();
+      this.editingUserId.set(null);
     }
-
-    await this.adminService.updateUserProfile(uid, user.role, profileData);
-    await this.adminService.loadAllUsers();
-    this.editingUserId.set(null);
   }
 
   addCrop() {
@@ -383,8 +474,10 @@ export class AdminDashboard implements OnDestroy {
   }
 
   async saveHeroLocation() {
-    await this.appSettingsService.updateHeroLocation(this.heroLocationForm);
-    this.editingHeroLocation.set(false);
+    if (confirm('Are you sure you want to update the hero location message?')) {
+      await this.appSettingsService.updateHeroLocation(this.heroLocationForm);
+      this.editingHeroLocation.set(false);
+    }
   }
 
   get currentHeroLocation(): string {
@@ -402,8 +495,10 @@ export class AdminDashboard implements OnDestroy {
   }
 
   async savePhoneNumber() {
-    await this.appSettingsService.updatePhoneNumber(this.phoneNumberForm);
-    this.editingPhoneNumber.set(false);
+    if (confirm('Are you sure you want to update the phone number?')) {
+      await this.appSettingsService.updatePhoneNumber(this.phoneNumberForm);
+      this.editingPhoneNumber.set(false);
+    }
   }
 
   get currentPhoneNumber(): string {
@@ -422,8 +517,10 @@ export class AdminDashboard implements OnDestroy {
   }
 
   async saveTestimonials() {
-    await this.appSettingsService.updateTestimonials(this.testimonialsForm);
-    this.editingTestimonials.set(false);
+    if (confirm('Are you sure you want to update the testimonials?')) {
+      await this.appSettingsService.updateTestimonials(this.testimonialsForm);
+      this.editingTestimonials.set(false);
+    }
   }
 
   addTestimonial() {
@@ -450,8 +547,10 @@ export class AdminDashboard implements OnDestroy {
   }
 
   async saveFAQs() {
-    await this.appSettingsService.updateFAQs(this.faqsForm);
-    this.editingFAQs.set(false);
+    if (confirm('Are you sure you want to update the FAQs?')) {
+      await this.appSettingsService.updateFAQs(this.faqsForm);
+      this.editingFAQs.set(false);
+    }
   }
 
   addFAQ() {
@@ -478,8 +577,10 @@ export class AdminDashboard implements OnDestroy {
   }
 
   async saveDefaultMandi() {
-    await this.appSettingsService.updateDefaultMandi(this.defaultMandiForm);
-    this.editingDefaultMandi.set(false);
+    if (confirm('Are you sure you want to update the default mandi?')) {
+      await this.appSettingsService.updateDefaultMandi(this.defaultMandiForm);
+      this.editingDefaultMandi.set(false);
+    }
   }
 
   startEditMandiList() {
@@ -493,8 +594,10 @@ export class AdminDashboard implements OnDestroy {
   }
 
   async saveMandiList() {
-    await this.appSettingsService.updateMandiList(this.mandiListForm);
-    this.editingMandiList.set(false);
+    if (confirm('Are you sure you want to update the mandi list?')) {
+      await this.appSettingsService.updateMandiList(this.mandiListForm);
+      this.editingMandiList.set(false);
+    }
   }
 
   addMandi() {
@@ -525,8 +628,10 @@ export class AdminDashboard implements OnDestroy {
   }
 
   async saveStats() {
-    await this.appSettingsService.updateStats(this.statsForm);
-    this.editingStats.set(false);
+    if (confirm('Are you sure you want to update the statistics?')) {
+      await this.appSettingsService.updateStats(this.statsForm);
+      this.editingStats.set(false);
+    }
   }
 
   addStat() {

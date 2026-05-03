@@ -1,7 +1,7 @@
 <div class="admin-page">
   <div class="admin-header">
     <div class="admin-title">
-      <img src="assets/images/logo.svg" alt="Logo" width="32" height="32" />
+      <img src="logo.jpg" alt="Logo" width="48" height="48" />
       <div>
         <h1>Admin Dashboard</h1>
         <p class="header-subtitle">Manage rates, orders, and users</p>
@@ -84,20 +84,38 @@
           <div class="data-card enhanced-card">
             <div class="card-header">
               <div class="card-main">
-                <img
-                  [src]="ratesService.getCropImage(rate.crop)"
-                  [alt]="rate.crop"
-                  class="crop-img"
-                />
+                @if (rate.photo) {
+                  <img [src]="rate.photo" [alt]="rate.crop" class="crop-img rate-photo-display" />
+                }
+                @if (!rate.photo) {
+                  <img
+                    [src]="ratesService.getCropImage(rate.crop)"
+                    [alt]="rate.crop"
+                    class="crop-img"
+                  />
+                }
                 <div class="card-info">
                   <h3>{{ rate.crop }}</h3>
                   <div class="card-meta">
                     <span class="meta-tag">{{ rate.mandi }}</span>
                     <span class="meta-tag merchant">{{ rate.merchantName }}</span>
+                    <span
+                      class="meta-tag status"
+                      [class.status-pending]="rate.status === 'pending'"
+                      [class.status-approved]="rate.status === 'approved'"
+                      [class.status-rejected]="rate.status === 'rejected'"
+                    >
+                      {{ rate.status }}
+                    </span>
                   </div>
                 </div>
               </div>
               <div class="card-actions">
+                @if (rate.status === 'pending') {
+                  <button class="approve-btn" (click)="startApproveRate(rate)">✅ Approve</button>
+                  <button class="reject-btn" (click)="rejectRate(rate)">❌ Reject</button>
+                }
+                <button class="edit-btn" (click)="startEditRatePhoto(rate)">📷 Photo</button>
                 <button class="edit-btn" (click)="startEditRate(rate)">✏️ Edit</button>
                 <button class="delete-btn" (click)="deleteRate(rate)">🗑️ Delete</button>
               </div>
@@ -105,52 +123,95 @@
 
             @if (editingRate()?.id !== rate.id) {
               <div class="grade-grid">
-                <div class="grade-item grade-a">
-                  <span class="grade-label">Grade A</span>
-                  <span class="grade-price">{{ formatPrice(rate.gradeAMin, rate.gradeAMax) }}</span>
-                </div>
-                <div class="grade-item grade-b">
-                  <span class="grade-label">Grade B</span>
-                  <span class="grade-price">{{ formatPrice(rate.gradeBMin, rate.gradeBMax) }}</span>
-                </div>
-                <div class="grade-item grade-c">
-                  <span class="grade-label">Grade C</span>
-                  <span class="grade-price">{{ formatPrice(rate.gradeCMin, rate.gradeCMax) }}</span>
-                </div>
+                @for (grade of rate.grades; track grade.name) {
+                  <div class="grade-item">
+                    <span class="grade-label">{{ grade.name }}</span>
+                    <span class="grade-price">{{ formatPrice(grade.price) }}</span>
+                  </div>
+                }
               </div>
             }
 
             @if (editingRate()?.id === rate.id) {
               <div class="edit-form">
                 <div class="form-grid">
-                  <div class="form-group">
-                    <label>Grade A Min</label>
-                    <input type="number" [(ngModel)]="editForm.gradeAMin" placeholder="Min" />
-                  </div>
-                  <div class="form-group">
-                    <label>Grade A Max</label>
-                    <input type="number" [(ngModel)]="editForm.gradeAMax" placeholder="Max" />
-                  </div>
-                  <div class="form-group">
-                    <label>Grade B Min</label>
-                    <input type="number" [(ngModel)]="editForm.gradeBMin" placeholder="Min" />
-                  </div>
-                  <div class="form-group">
-                    <label>Grade B Max</label>
-                    <input type="number" [(ngModel)]="editForm.gradeBMax" placeholder="Max" />
-                  </div>
-                  <div class="form-group">
-                    <label>Grade C Min</label>
-                    <input type="number" [(ngModel)]="editForm.gradeCMin" placeholder="Min" />
-                  </div>
-                  <div class="form-group">
-                    <label>Grade C Max</label>
-                    <input type="number" [(ngModel)]="editForm.gradeCMax" placeholder="Max" />
-                  </div>
+                  @for (grade of editForm.grades; track $index) {
+                    <div class="form-group">
+                      <label>Grade Name</label>
+                      <input
+                        type="text"
+                        [(ngModel)]="editForm.grades[$index].name"
+                        placeholder="Grade Name"
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label>Price (₹)</label>
+                      <input
+                        type="number"
+                        [(ngModel)]="editForm.grades[$index].price"
+                        placeholder="Price"
+                        min="0"
+                      />
+                    </div>
+                  }
                 </div>
                 <div class="edit-actions">
                   <button class="save-btn" (click)="saveRate()">💾 Save Changes</button>
                   <button class="cancel-btn" (click)="cancelEditRate()">❌ Cancel</button>
+                </div>
+              </div>
+            }
+
+            @if (approvingRate()?.id === rate.id) {
+              <div class="edit-form approval-form">
+                <h4>Set Platform Fee (₹/kg)</h4>
+                <div class="form-group">
+                  <label>Platform Fee</label>
+                  <input
+                    type="number"
+                    [(ngModel)]="approvalForm.platformFee"
+                    min="0"
+                    step="0.5"
+                    placeholder="Enter platform fee per kg"
+                  />
+                </div>
+                <div class="edit-actions">
+                  <button class="save-btn approve-action" (click)="approveRate()">
+                    ✅ Approve Rate
+                  </button>
+                  <button class="cancel-btn" (click)="cancelApproveRate()">❌ Cancel</button>
+                </div>
+              </div>
+            }
+
+            @if (editingRatePhoto()?.id === rate.id) {
+              <div class="edit-form photo-form">
+                <h4>Edit Photo</h4>
+                <div class="photo-upload-section">
+                  @if (photoPreview) {
+                    <div class="photo-preview">
+                      <img [src]="photoPreview" alt="Rate photo" />
+                      <button type="button" class="remove-photo-btn" (click)="photoPreview = ''">
+                        ×
+                      </button>
+                    </div>
+                  }
+                  <div class="photo-input-wrapper">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      (change)="onPhotoUpload($event)"
+                      name="photo"
+                      #photoInput
+                    />
+                    <button type="button" class="upload-btn" (click)="photoInput.click()">
+                      {{ photoPreview ? 'Change Photo' : 'Upload Photo' }}
+                    </button>
+                  </div>
+                </div>
+                <div class="edit-actions">
+                  <button class="save-btn" (click)="saveRatePhoto()">💾 Save Photo</button>
+                  <button class="cancel-btn" (click)="cancelEditRatePhoto()">❌ Cancel</button>
                 </div>
               </div>
             }

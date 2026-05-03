@@ -27,7 +27,7 @@ export class FarmerDashboard implements OnDestroy {
   confirmDialogAction = signal<(() => void) | null>(null);
 
   // Order form fields
-  orderGrade: 'A' | 'B' | 'C' = 'A';
+  orderGrade = 'Grade A';
   orderQuantity = 100;
   orderUnit: 'kg' | 'ton' | 'box' = 'kg';
   orderNotes = '';
@@ -70,7 +70,7 @@ export class FarmerDashboard implements OnDestroy {
       if (user) {
         if (this.unsubRates) this.unsubRates();
         if (this.unsubOrders) this.unsubOrders();
-        this.unsubRates = this.ratesService.listenToAllRates();
+        this.unsubRates = this.ratesService.listenToAllRates(undefined, 'approved');
         this.unsubOrders = this.orderService.listenToFarmerOrders(user.uid);
       }
     });
@@ -83,7 +83,7 @@ export class FarmerDashboard implements OnDestroy {
 
   openOrderForm(rate: CropRate) {
     this.selectedRate.set(rate);
-    this.orderGrade = 'A';
+    this.orderGrade = rate.grades[0]?.name || 'Grade A';
     this.orderQuantity = 100;
     this.orderUnit = 'kg';
     this.orderNotes = '';
@@ -95,26 +95,19 @@ export class FarmerDashboard implements OnDestroy {
     this.selectedRate.set(null);
   }
 
-  getPrice(rate: CropRate, grade: 'A' | 'B' | 'C'): { min: number; max: number } {
-    switch (grade) {
-      case 'A':
-        return { min: rate.gradeAMin, max: rate.gradeAMax };
-      case 'B':
-        return { min: rate.gradeBMin, max: rate.gradeBMax };
-      case 'C':
-        return { min: rate.gradeCMin, max: rate.gradeCMax };
-    }
+  getGradePrice(rate: CropRate, gradeName: string): number {
+    const grade = rate.grades.find((g) => g.name === gradeName);
+    return grade?.price || 0;
   }
 
   get estimatedPrice(): number {
     const rate = this.selectedRate();
     if (!rate) return 0;
-    const p = this.getPrice(rate, this.orderGrade);
-    const avg = (p.min + p.max) / 2;
+    const price = this.getGradePrice(rate, this.orderGrade);
     let qty = this.orderQuantity;
     if (this.orderUnit === 'ton') qty *= 1000;
     if (this.orderUnit === 'box') qty *= 20;
-    return Math.round(avg * qty);
+    return Math.round(price * qty);
   }
 
   get estimatedCommission(): { commission: number; commissionRate: number } {
@@ -123,7 +116,11 @@ export class FarmerDashboard implements OnDestroy {
     let qty = this.orderQuantity;
     if (this.orderUnit === 'ton') qty *= 1000;
     if (this.orderUnit === 'box') qty *= 20;
-    return this.orderService.calculateCommission(0, qty, rate.crop);
+    const price = this.getGradePrice(rate, this.orderGrade);
+    const total = price * qty;
+    const commissionRate = rate.platformFee || 0;
+    const commission = total * (commissionRate / 100);
+    return { commission: Math.round(commission), commissionRate };
   }
 
   openConfirmDialog(title: string, message: string, action: () => void) {
@@ -155,27 +152,23 @@ export class FarmerDashboard implements OnDestroy {
       return;
     }
 
-    // Ensure notes is handled correctly - allow empty string
     const notes = this.orderNotes.trim();
 
     this.submittingOrder.set(true);
     this.orderError.set('');
 
     try {
-      const p = this.getPrice(rate, this.orderGrade);
-      const pricePerUnit = Math.round((p.min + p.max) / 2);
+      const pricePerUnit = this.getGradePrice(rate, this.orderGrade);
       let qtyKg = this.orderQuantity;
       if (this.orderUnit === 'ton') qtyKg *= 1000;
       if (this.orderUnit === 'box') qtyKg *= 20;
 
       const totalAmount = pricePerUnit * qtyKg;
-      const { commission, commissionRate } = this.orderService.calculateCommission(
-        pricePerUnit,
-        qtyKg,
-        rate.crop,
-      );
+      const platformFee = rate.platformFee ?? 0;
+      const commission = platformFee * qtyKg;
+      const commissionRate: number = platformFee;
 
-      await this.orderService.createOrder({
+      const orderData = {
         farmerId: user.uid,
         farmerName: farmer.displayName,
         farmerPhone: farmer.phone,
@@ -189,21 +182,24 @@ export class FarmerDashboard implements OnDestroy {
         mandi: rate.mandi,
         grade: this.orderGrade,
         quantity: qtyKg,
-        unit: 'kg',
+        unit: 'kg' as const,
         pricePerUnit,
         totalAmount,
         commission,
         commissionRate,
         netAmount: totalAmount - commission,
-        status: 'requested',
-        farmerNotes: notes || undefined,
-      });
+        status: 'requested' as const,
+        farmerNotes: notes,
+      };
+
+      await this.orderService.createOrder(orderData);
 
       this.closeOrderForm();
       this.activeTab.set('orders');
       this.orderSuccess.set(true);
       setTimeout(() => this.orderSuccess.set(false), 4000);
-    } catch {
+    } catch (error) {
+      console.error('Order placement error:', error);
       this.orderError.set('Failed to place order. Please try again.');
     } finally {
       this.submittingOrder.set(false);
@@ -252,7 +248,7 @@ export class FarmerDashboard implements OnDestroy {
     );
   }
 
-  formatPrice(min: number, max: number): string {
-    return this.ratesService.formatPrice(min, max);
+  formatPrice(price: number): string {
+    return `₹ ${price.toLocaleString('en-IN')}`;
   }
 }

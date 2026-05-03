@@ -39,7 +39,7 @@ export interface Order {
   crop: string;
   emoji: string;
   mandi: string;
-  grade: 'A' | 'B' | 'C';
+  grade: string;
   quantity: number;
   unit: 'kg' | 'ton' | 'box';
   pricePerUnit: number;
@@ -98,7 +98,7 @@ export class OrderService {
     const q = query(
       this.ordersCollection,
       where('farmerId', '==', farmerId),
-      orderBy('createdAt', 'desc')
+      orderBy('createdAt', 'desc'),
     );
 
     return onSnapshot(
@@ -122,7 +122,7 @@ export class OrderService {
             this.farmerOrders.set(orders);
           });
         }
-      }
+      },
     );
   }
 
@@ -130,7 +130,7 @@ export class OrderService {
     const q = query(
       this.ordersCollection,
       where('merchantId', '==', merchantId),
-      orderBy('createdAt', 'desc')
+      orderBy('createdAt', 'desc'),
     );
 
     return onSnapshot(
@@ -154,7 +154,7 @@ export class OrderService {
             this.merchantOrders.set(orders);
           });
         }
-      }
+      },
     );
   }
 
@@ -210,7 +210,10 @@ export class OrderService {
     return updateDoc(docRef, {
       status: 'rejected',
       rejectionReason: reason,
-      statusHistory: [...(current.statusHistory || []), { status: 'rejected', timestamp: now, note: reason }],
+      statusHistory: [
+        ...(current.statusHistory || []),
+        { status: 'rejected', timestamp: now, note: reason },
+      ],
       updatedAt: serverTimestamp(),
     });
   }
@@ -219,7 +222,16 @@ export class OrderService {
     return this.updateOrderStatus(orderId, 'cancelled', 'Cancelled by farmer');
   }
 
-  async updateLogistics(orderId: string, logistics: { transportPartner?: string; vehicleNumber?: string; pickupDate?: string; pickupTime?: string; estimatedDelivery?: string }) {
+  async updateLogistics(
+    orderId: string,
+    logistics: {
+      transportPartner?: string;
+      vehicleNumber?: string;
+      pickupDate?: string;
+      pickupTime?: string;
+      estimatedDelivery?: string;
+    },
+  ) {
     const docRef = doc(db, 'orders', orderId);
     return updateDoc(docRef, {
       ...logistics,
@@ -227,7 +239,10 @@ export class OrderService {
     });
   }
 
-  async markPayment(orderId: string, payment: { paymentMethod: string; paymentReference: string; paymentDate: string }) {
+  async markPayment(
+    orderId: string,
+    payment: { paymentMethod: string; paymentReference: string; paymentDate: string },
+  ) {
     const docRef = doc(db, 'orders', orderId);
     const docSnap = await getDoc(docRef);
     if (!docSnap.exists()) return;
@@ -238,7 +253,10 @@ export class OrderService {
     return updateDoc(docRef, {
       ...payment,
       status: 'paid',
-      statusHistory: [...(current.statusHistory || []), { status: 'paid', timestamp: now, note: `Paid via ${payment.paymentMethod}` }],
+      statusHistory: [
+        ...(current.statusHistory || []),
+        { status: 'paid', timestamp: now, note: `Paid via ${payment.paymentMethod}` },
+      ],
       updatedAt: serverTimestamp(),
     });
   }
@@ -249,17 +267,21 @@ export class OrderService {
     return STATUS_FLOW[idx + 1];
   }
 
-  calculateCommission(pricePerUnit: number, quantity: number, crop: string): { commission: number; commissionRate: number } {
+  calculateCommission(
+    pricePerUnit: number,
+    quantity: number,
+    crop: string,
+  ): { commission: number; commissionRate: number } {
     // Commission rates per kg based on crop type (from proposal: Rs 3-8/kg)
     const rates: Record<string, number> = {
-      'Broccoli': 4,
-      'Grapes': 5,
-      'Muskmelon': 3,
+      Broccoli: 4,
+      Grapes: 5,
+      Muskmelon: 3,
       'Apple Ber': 3,
-      'Onion': 3,
-      'Tomato': 3,
-      'Potato': 3,
-      'Cauliflower': 3,
+      Onion: 3,
+      Tomato: 3,
+      Potato: 3,
+      Cauliflower: 3,
       'Green Chilli': 4,
     };
     const commissionRate = rates[crop] || 4;
