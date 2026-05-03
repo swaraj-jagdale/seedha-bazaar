@@ -113,7 +113,6 @@ const en: TranslationMap = {
   'rateForm.selectCrop': 'Select crop',
   'rateForm.customCrop': 'Custom (other)',
   'rateForm.cropName': 'Crop Name',
-  'rateForm.cropEmoji': 'Emoji (optional)',
   'rateForm.photo': 'Photo',
   'rateForm.uploadPhoto': 'Upload Photo',
   'rateForm.changePhoto': 'Change Photo',
@@ -376,8 +375,6 @@ const hi: TranslationMap = {
   'rateForm.selectCrop': '\u092B\u0938\u0932 \u091A\u0941\u0928\u0947\u0902',
   'rateForm.customCrop': '\u0905\u0928\u094D\u092F (\u0915\u0938\u094D\u091F\u092E)',
   'rateForm.cropName': '\u092B\u0938\u0932 \u0915\u093E \u0928\u093E\u092E',
-  'rateForm.cropEmoji':
-    '\u0907\u092E\u094B\u091C\u0940 (\u0935\u0948\u0915\u0932\u094D\u092A\u093F\u0915)',
   'rateForm.photo': '\u092B\u094B\u091F\u094B',
   'rateForm.uploadPhoto':
     '\u092B\u094B\u091F\u094B \u0905\u092A\u0932\u094B\u0921 \u0915\u0930\u0947\u0902',
@@ -676,7 +673,6 @@ const mr: TranslationMap = {
   'rateForm.selectCrop': '\u092A\u0940\u0915 \u0928\u093F\u0935\u0921\u093E',
   'rateForm.customCrop': '\u0907\u0924\u0930 (\u0915\u0938\u094D\u091F\u092E)',
   'rateForm.cropName': '\u092A\u093F\u0915\u093E\u091A\u0947 \u0928\u093E\u0935',
-  'rateForm.cropEmoji': '\u0907\u092E\u094B\u091C\u0940 (\u0910\u091A\u094D\u091B\u093F\u0915)',
   'rateForm.photo': '\u092B\u094B\u091F\u094B',
   'rateForm.uploadPhoto':
     '\u092B\u094B\u091F\u094B \u0905\u092A\u0932\u094B\u0921 \u0915\u0930\u093E',

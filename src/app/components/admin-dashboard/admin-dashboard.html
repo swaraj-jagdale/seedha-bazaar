@@ -87,13 +87,6 @@
                 @if (rate.photo) {
                   <img [src]="rate.photo" [alt]="rate.crop" class="crop-img rate-photo-display" />
                 }
-                @if (!rate.photo) {
-                  <img
-                    [src]="ratesService.getCropImage(rate.crop)"
-                    [alt]="rate.crop"
-                    class="crop-img"
-                  />
-                }
                 <div class="card-info">
                   <h3>{{ rate.crop }}</h3>
                   <div class="card-meta">
@@ -112,7 +105,7 @@
               </div>
               <div class="card-actions">
                 @if (rate.status === 'pending') {
-                  <button class="approve-btn" (click)="startApproveRate(rate)">✅ Approve</button>
+                  <button class="approve-btn" (click)="approveRate(rate)">✅ Approve</button>
                   <button class="reject-btn" (click)="rejectRate(rate)">❌ Reject</button>
                 }
                 <button class="edit-btn" (click)="startEditRatePhoto(rate)">📷 Photo</button>
@@ -129,6 +122,21 @@
                     <span class="grade-price">{{ formatPrice(grade.price) }}</span>
                   </div>
                 }
+              </div>
+              <div class="platform-fee-section">
+                <div class="form-group">
+                  <label>Platform Fee (₹/kg)</label>
+                  <div class="input-with-action">
+                    <input
+                      type="number"
+                      [(ngModel)]="rate.platformFee"
+                      min="0"
+                      step="0.5"
+                      placeholder="Enter platform fee"
+                    />
+                    <button class="save-fee-btn" (click)="savePlatformFee(rate)">💾</button>
+                  </div>
+                </div>
               </div>
             }
 
@@ -158,28 +166,6 @@
                 <div class="edit-actions">
                   <button class="save-btn" (click)="saveRate()">💾 Save Changes</button>
                   <button class="cancel-btn" (click)="cancelEditRate()">❌ Cancel</button>
-                </div>
-              </div>
-            }
-
-            @if (approvingRate()?.id === rate.id) {
-              <div class="edit-form approval-form">
-                <h4>Set Platform Fee (₹/kg)</h4>
-                <div class="form-group">
-                  <label>Platform Fee</label>
-                  <input
-                    type="number"
-                    [(ngModel)]="approvalForm.platformFee"
-                    min="0"
-                    step="0.5"
-                    placeholder="Enter platform fee per kg"
-                  />
-                </div>
-                <div class="edit-actions">
-                  <button class="save-btn approve-action" (click)="approveRate()">
-                    ✅ Approve Rate
-                  </button>
-                  <button class="cancel-btn" (click)="cancelApproveRate()">❌ Cancel</button>
                 </div>
               </div>
             }
@@ -233,11 +219,7 @@
           <div class="data-card enhanced-card order-card">
             <div class="card-header">
               <div class="card-main">
-                <img
-                  [src]="ratesService.getCropImage(order.crop)"
-                  [alt]="order.crop"
-                  class="crop-img"
-                />
+                <div class="crop-placeholder">{{ order.crop.charAt(0) }}</div>
                 <div class="card-info">
                   <h3>{{ order.crop }} - Grade {{ order.grade }}</h3>
                   <div class="card-meta">

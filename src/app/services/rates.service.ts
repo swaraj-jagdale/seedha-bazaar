@@ -23,38 +23,27 @@ export interface Grade {
 
 export interface CropRate {
   id?: string;
-  merchantId: string;
-  merchantName: string;
-  mandi: string;
   crop: string;
-  emoji: string;
   photo?: string;
   grades: Grade[];
   platformFee?: number;
   status?: RateStatus;
+  merchantId: string;
+  merchantName: string;
+  mandi: string;
   createdAt?: Timestamp;
   updatedAt?: Timestamp;
 }
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root',
+})
 export class RatesService {
   private ratesCollection = collection(db, 'rates');
 
+  // Reactive state
   allRates = signal<CropRate[]>([]);
   merchantRates = signal<CropRate[]>([]);
-
-  private cropImageMap: Record<string, string> = {
-    Onion: 'assets/images/crops/onion.jpg',
-    Tomato: 'assets/images/crops/tomato.jpg',
-    Broccoli: 'assets/images/crops/broccoli.jpg',
-    Potato: 'assets/images/crops/potato.jpg',
-    Cauliflower: 'assets/images/crops/cauliflower.jpg',
-    'Green Chilli': 'assets/images/crops/chilli.jpg',
-  };
-
-  getCropImage(cropName: string): string {
-    return this.cropImageMap[cropName] || 'assets/images/crops/default.jpg';
-  }
 
   listenToAllRates(mandi?: string, status?: RateStatus) {
     let q;

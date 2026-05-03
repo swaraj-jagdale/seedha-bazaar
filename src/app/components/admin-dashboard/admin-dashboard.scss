@@ -392,6 +392,59 @@
   border-top: 1px solid var(--border-color);
 }
 
+.platform-fee-section {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+
+  .form-group {
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-medium);
+      margin-bottom: 8px;
+    }
+
+    .input-with-action {
+      display: flex;
+      gap: 8px;
+
+      input {
+        flex: 1;
+        padding: 10px 12px;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        font-size: 0.9rem;
+        font-family: 'Poppins', sans-serif;
+        color: var(--text-dark);
+        transition: border-color 0.2s;
+
+        &:focus {
+          outline: none;
+          border-color: var(--primary-green);
+        }
+      }
+
+      .save-fee-btn {
+        padding: 10px 16px;
+        background: var(--primary-green);
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: background 0.2s;
+
+        &:hover {
+          background: #2e7d32;
+        }
+      }
+    }
+  }
+}
+
 .grade-item {
   background: var(--bg-light);
   padding: 12px;

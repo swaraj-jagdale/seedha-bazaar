@@ -55,11 +55,9 @@
             @for (rate of ratesService.merchantRates(); track rate.id) {
               <div class="rate-card">
                 <div class="rate-card-img">
-                  <img
-                    [src]="ratesService.getCropImage(rate.crop)"
-                    [alt]="rate.crop"
-                    class="crop-img"
-                  />
+                  @if (rate.photo) {
+                    <img [src]="rate.photo" [alt]="rate.crop" class="crop-img" />
+                  }
                   <div class="card-actions">
                     <button class="edit-btn" (click)="openEditForm(rate)" title="Edit">
                       <img src="assets/images/edit-icon.svg" alt="Edit" width="16" height="16" />
@@ -76,9 +74,6 @@
                 </div>
                 <div class="rate-card-header">
                   <div class="crop-info">
-                    @if (rate.photo) {
-                      <img [src]="rate.photo" [alt]="rate.crop" class="rate-photo" />
-                    }
                     <h4>{{ rate.crop }}</h4>
                     <span class="mandi-tag">{{ rate.mandi }}</span>
                     <span class="merchant-name">{{ rate.merchantName }}</span>
@@ -118,11 +113,7 @@
             <div class="order-card pending">
               <div class="order-header">
                 <div class="order-crop">
-                  <img
-                    [src]="ratesService.getCropImage(order.crop)"
-                    [alt]="order.crop"
-                    class="crop-img"
-                  />
+                  <div class="crop-placeholder">{{ order.crop.charAt(0) }}</div>
                   <div>
                     <h4>{{ order.crop }} - {{ lang.t('rates.grade' + order.grade) }}</h4>
                     <span class="order-farmer"
@@ -173,11 +164,7 @@
             <div class="order-card">
               <div class="order-header">
                 <div class="order-crop">
-                  <img
-                    [src]="ratesService.getCropImage(order.crop)"
-                    [alt]="order.crop"
-                    class="crop-img"
-                  />
+                  <div class="crop-placeholder">{{ order.crop.charAt(0) }}</div>
                   <div>
                     <h4>{{ order.crop }} - {{ lang.t('rates.grade' + order.grade) }}</h4>
                     <span class="order-farmer"
@@ -205,11 +192,7 @@
             <div class="order-card past">
               <div class="order-header">
                 <div class="order-crop">
-                  <img
-                    [src]="ratesService.getCropImage(order.crop)"
-                    [alt]="order.crop"
-                    class="crop-img"
-                  />
+                  <div class="crop-placeholder">{{ order.crop.charAt(0) }}</div>
                   <div>
                     <h4>{{ order.crop }} - {{ order.farmerName }}</h4>
                     <span class="order-farmer"

@@ -16,12 +16,12 @@ export class RateForm implements OnInit {
   @Output() cancelled = new EventEmitter<void>();
 
   crops = [
-    { name: 'Onion', emoji: '🧅' },
-    { name: 'Tomato', emoji: '🍅' },
-    { name: 'Broccoli', emoji: '🍎' },
-    { name: 'Potato', emoji: '🥔' },
-    { name: 'Cauliflower', emoji: '🥦' },
-    { name: 'Green Chilli', emoji: '🌶️' },
+    { name: 'Onion' },
+    { name: 'Tomato' },
+    { name: 'Broccoli' },
+    { name: 'Potato' },
+    { name: 'Cauliflower' },
+    { name: 'Green Chilli' },
   ];
 
   mandis = ['Azadpur Mandi', 'Vashi Mandi', 'Lasalgaon Mandi'];
@@ -29,7 +29,6 @@ export class RateForm implements OnInit {
   selectedCrop = '';
   isCustomCrop = false;
   customCropName = '';
-  customCropEmoji = '';
   selectedMandi = 'Azadpur Mandi';
   isCustomMandi = false;
   customMandiName = '';
@@ -55,7 +54,6 @@ export class RateForm implements OnInit {
         this.selectedCrop = '__custom__';
         this.isCustomCrop = true;
         this.customCropName = this.editRate.crop;
-        this.customCropEmoji = this.editRate.emoji;
       }
       const existingMandi = this.mandis.find((m) => m === this.editRate!.mandi);
       if (existingMandi) {
@@ -75,7 +73,6 @@ export class RateForm implements OnInit {
     this.isCustomCrop = this.selectedCrop === '__custom__';
     if (!this.isCustomCrop) {
       this.customCropName = '';
-      this.customCropEmoji = '';
     }
   }
 
@@ -91,13 +88,6 @@ export class RateForm implements OnInit {
       return this.customCropName;
     }
     return this.selectedCrop;
-  }
-
-  getEmoji(): string {
-    if (this.isCustomCrop) {
-      return this.customCropEmoji || '🌾';
-    }
-    return this.crops.find((c) => c.name === this.selectedCrop)?.emoji || '';
   }
 
   getMandiName(): string {
@@ -146,7 +136,6 @@ export class RateForm implements OnInit {
         merchantName: user.displayName || 'Unknown',
         mandi: this.getMandiName(),
         crop: this.getCropName(),
-        emoji: this.getEmoji(),
         photo: this.photo || undefined,
         grades: this.grades,
         platformFee: 0,

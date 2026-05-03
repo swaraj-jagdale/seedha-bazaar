@@ -38,10 +38,6 @@ export class AdminDashboard implements OnDestroy {
   editingRate = signal<CropRate | null>(null);
   editingRatePhoto = signal<CropRate | null>(null);
   photoPreview = '';
-  approvingRate = signal<CropRate | null>(null);
-  approvalForm = {
-    platformFee: 0,
-  };
   editForm = {
     grades: [] as Grade[],
   };
@@ -194,29 +190,27 @@ export class AdminDashboard implements OnDestroy {
   }
 
   // Rate approval
-  startApproveRate(rate: CropRate) {
-    this.approvingRate.set(rate);
-    this.approvalForm = {
-      platformFee: rate.platformFee ?? 0,
-    };
-  }
-
-  cancelApproveRate() {
-    this.approvingRate.set(null);
-  }
-
-  async approveRate() {
-    const rate = this.approvingRate();
-    if (!rate?.id) return;
+  async approveRate(rate: CropRate) {
+    if (!rate.id) return;
     if (confirm(`Are you sure you want to approve the rate for ${rate.crop}?`)) {
-      await this.adminService.updateRate(rate.id, {
-        platformFee: this.approvalForm.platformFee,
-        status: 'approved' as const,
-      });
-      this.approvingRate.set(null);
+      await this.adminService.updateRate(rate.id, { status: 'approved' as const });
     }
   }
 
+  async savePlatformFee(rate: CropRate) {
+    if (!rate.id) return;
+    await this.adminService.updateRate(rate.id, { platformFee: rate.platformFee ?? 0 });
+  }
+
+  updatePlatformFee(rateId: string, value: number) {
+    const rates = this.adminService.allRates();
+    const rate = rates.find((r: CropRate) => r.id === rateId);
+    if (rate) {
+      rate.platformFee = value;
+    }
+  }
+
+  // ...
   async rejectRate(rate: CropRate) {
     if (!rate.id) return;
     if (confirm(`Are you sure you want to reject the rate for ${rate.crop}?`)) {

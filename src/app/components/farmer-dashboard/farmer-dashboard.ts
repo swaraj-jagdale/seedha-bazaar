@@ -104,10 +104,17 @@ export class FarmerDashboard implements OnDestroy {
     return grade?.price || 0;
   }
 
+  getNetPrice(rate: CropRate, gradeName: string): number {
+    const grade = rate.grades.find((g) => g.name === gradeName);
+    const merchantPrice = grade?.price || 0;
+    const platformFee = rate.platformFee ?? 0;
+    return Math.max(0, merchantPrice - platformFee);
+  }
+
   get estimatedPrice(): number {
     const rate = this.selectedRate();
     if (!rate) return 0;
-    const price = this.getGradePrice(rate, this.orderGrade);
+    const price = this.getNetPrice(rate, this.orderGrade);
     let qty = this.orderQuantity;
     if (this.orderUnit === 'ton') qty *= 1000;
     if (this.orderUnit === 'box') qty *= 20;
@@ -120,10 +127,8 @@ export class FarmerDashboard implements OnDestroy {
     let qty = this.orderQuantity;
     if (this.orderUnit === 'ton') qty *= 1000;
     if (this.orderUnit === 'box') qty *= 20;
-    const price = this.getGradePrice(rate, this.orderGrade);
-    const total = price * qty;
     const commissionRate = rate.platformFee || 0;
-    const commission = total * (commissionRate / 100);
+    const commission = commissionRate * qty;
     return { commission: Math.round(commission), commissionRate };
   }
 
@@ -182,7 +187,6 @@ export class FarmerDashboard implements OnDestroy {
         merchantName: rate.merchantName,
         merchantPhone: '',
         crop: rate.crop,
-        emoji: rate.emoji,
         mandi: rate.mandi,
         grade: this.orderGrade,
         quantity: qtyKg,

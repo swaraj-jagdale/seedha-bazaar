@@ -30,42 +30,34 @@ export interface Order {
   id?: string;
   farmerId: string;
   farmerName: string;
-  farmerPhone: string;
   farmerVillage: string;
   farmerDistrict: string;
   merchantId: string;
   merchantName: string;
-  merchantPhone: string;
   crop: string;
-  emoji: string;
   mandi: string;
   grade: string;
   quantity: number;
-  unit: 'kg' | 'ton' | 'box';
+  unit: string;
   pricePerUnit: number;
-  totalAmount: number;
   commission: number;
-  commissionRate: number;
   netAmount: number;
+  totalAmount: number;
   status: OrderStatus;
-  statusHistory: StatusEntry[];
-  // Logistics
+  updatedAt?: Timestamp;
+  notes?: string;
+  statusHistory?: StatusEntry[];
   transportPartner?: string;
   vehicleNumber?: string;
   pickupDate?: string;
   pickupTime?: string;
   estimatedDelivery?: string;
-  // Payment
-  paymentMethod?: string;
-  paymentDate?: string;
-  paymentReference?: string;
   expectedPaymentDate?: string;
-  // Notes
+  rejectionReason?: string;
+  paymentMethod?: string;
+  paymentReference?: string;
   farmerNotes?: string;
   merchantNotes?: string;
-  rejectionReason?: string;
-  createdAt?: Timestamp;
-  updatedAt?: Timestamp;
 }
 
 export interface StatusEntry {

@@ -66,21 +66,16 @@
         </div>
       } @else {
         <div class="rates-grid">
-          @for (rate of filteredRates(); track rate.id) {
+          @for (rate of ratesService.merchantRates(); track rate.id) {
             <div class="rate-card">
               <div class="rate-card-img">
-                <img
-                  [src]="ratesService.getCropImage(rate.crop)"
-                  [alt]="rate.crop"
-                  class="crop-img"
-                />
+                @if (rate.photo) {
+                  <img [src]="rate.photo" [alt]="rate.crop" class="crop-img" />
+                }
               </div>
               <div class="rate-card-header">
                 <div class="crop-info">
-                  @if (rate.photo) {
-                    <img [src]="rate.photo" [alt]="rate.crop" class="rate-photo" />
-                  }
-                  <h4>{{ rate.crop }} {{ rate.emoji }}</h4>
+                  <h4>{{ rate.crop }}</h4>
                   <span class="mandi-tag">{{ rate.mandi }}</span>
                   <span class="merchant-name">{{ rate.merchantName }}</span>
                 </div>
@@ -89,7 +84,9 @@
                 @for (grade of rate.grades; track grade.name) {
                   <div class="grade-row">
                     <span class="grade-label">{{ grade.name }}</span>
-                    <span class="grade-price">{{ formatPrice(grade.price) }}/kg</span>
+                    <span class="grade-price"
+                      >{{ formatPrice(getNetPrice(rate, grade.name)) }}/kg</span
+                    >
                   </div>
                 }
               </div>
@@ -109,11 +106,7 @@
             <div class="order-card">
               <div class="order-header">
                 <div class="order-crop">
-                  <img
-                    [src]="ratesService.getCropImage(order.crop)"
-                    [alt]="order.crop"
-                    class="crop-img"
-                  />
+                  <div class="crop-placeholder">{{ order.crop.charAt(0) }}</div>
                   <div>
                     <h4>{{ order.crop }} - {{ lang.t('rates.grade' + order.grade) }}</h4>
                     <span class="order-merchant"
@@ -191,11 +184,7 @@
             <div class="order-card past">
               <div class="order-header">
                 <div class="order-crop">
-                  <img
-                    [src]="ratesService.getCropImage(order.crop)"
-                    [alt]="order.crop"
-                    class="crop-img"
-                  />
+                  <div class="crop-placeholder">{{ order.crop.charAt(0) }}</div>
                   <div>
                     <h4>{{ order.crop }} - {{ lang.t('rates.grade' + order.grade) }}</h4>
                     <span class="order-merchant">{{ order.merchantName }}</span>
@@ -235,11 +224,7 @@
         <div class="modal" (click)="$event.stopPropagation()">
           <h3>{{ lang.t('farmerDashboard.placeOrder') }}</h3>
           <div class="selected-crop">
-            <img
-              [src]="ratesService.getCropImage(selectedRate()!.crop)"
-              [alt]="selectedRate()!.crop"
-              class="crop-img"
-            />
+            <div class="crop-placeholder">{{ selectedRate()!.crop.charAt(0) }}</div>
             <div>
               <h4>{{ selectedRate()!.crop }}</h4>
               <span>{{ selectedRate()!.merchantName }} - {{ selectedRate()!.mandi }}</span>
@@ -257,7 +242,9 @@
                   (click)="orderGrade = grade.name"
                 >
                   {{ grade.name }}
-                  <span class="grade-price-sm">{{ formatPrice(grade.price) }}</span>
+                  <span class="grade-price-sm">{{
+                    selectedRate() ? formatPrice(getNetPrice(selectedRate()!, grade.name)) : ''
+                  }}</span>
                 </button>
               }
             </div>
