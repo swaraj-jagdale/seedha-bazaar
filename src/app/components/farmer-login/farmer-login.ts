@@ -11,7 +11,7 @@ import { LanguageService } from '../../services/language.service';
   styleUrl: './farmer-login.scss',
 })
 export class FarmerLogin {
-  isRegistering = signal(true);
+  isRegistering = signal(false);
   isLoading = signal(false);
   error = signal('');
   showForgotPassword = signal(false);
@@ -35,21 +35,28 @@ export class FarmerLogin {
   acreage = 1;
 
   readonly cropOptions = [
-    'Broccoli', 'Grapes', 'Muskmelon', 'Apple Ber',
-    'Onion', 'Tomato', 'Potato', 'Cauliflower', 'Green Chilli',
+    'Broccoli',
+    'Grapes',
+    'Muskmelon',
+    'Apple Ber',
+    'Onion',
+    'Tomato',
+    'Potato',
+    'Cauliflower',
+    'Green Chilli',
   ];
   selectedCrops = signal<string[]>([]);
 
   constructor(
     public authService: AuthService,
     private router: Router,
-    public lang: LanguageService
+    public lang: LanguageService,
   ) {}
 
   toggleCrop(crop: string) {
     const current = this.selectedCrops();
     if (current.includes(crop)) {
-      this.selectedCrops.set(current.filter(c => c !== crop));
+      this.selectedCrops.set(current.filter((c) => c !== crop));
     } else {
       this.selectedCrops.set([...current, crop]);
     }
@@ -126,7 +133,7 @@ export class FarmerLogin {
     try {
       await this.authService.login(this.loginEmail, this.loginPassword);
       // Wait briefly for profile to load and check role
-      await new Promise(r => setTimeout(r, 500));
+      await new Promise((r) => setTimeout(r, 500));
       if (this.authService.isMerchant()) {
         this.error.set('This is a merchant account. Please use Merchant Login.');
         await this.authService.logout();

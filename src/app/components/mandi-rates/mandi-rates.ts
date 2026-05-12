@@ -7,6 +7,7 @@ import { AppSettingsService } from '../../services/app-settings.service';
 interface DisplayRate {
   name: string;
   grades: Grade[];
+  photo?: string;
 }
 
 interface Rate {
@@ -112,6 +113,7 @@ export class MandiRates implements OnDestroy {
       display.push({
         name: rate.crop,
         grades: rate.grades,
+        photo: rate.photo,
       });
     });
 

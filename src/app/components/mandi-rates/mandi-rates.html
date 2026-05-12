@@ -41,7 +41,11 @@
           @for (crop of displayRates(); track crop.name) {
             <div class="rate-card">
               <div class="rate-card-img">
-                <div class="crop-placeholder">{{ crop.name.charAt(0) }}</div>
+                @if (crop.photo) {
+                  <img [src]="crop.photo" [alt]="crop.name" class="crop-img" />
+                } @else {
+                  <div class="crop-placeholder">{{ crop.name.charAt(0) }}</div>
+                }
               </div>
               <div class="rate-card-header">
                 <h3 class="crop-name">{{ crop.name }}</h3>
