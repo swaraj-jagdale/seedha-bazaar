@@ -40,6 +40,7 @@ export class AdminDashboard implements OnDestroy {
   photoPreview = '';
   editForm = {
     grades: [] as Grade[],
+    platformFee: 0,
   };
 
   // Order status update
@@ -170,6 +171,7 @@ export class AdminDashboard implements OnDestroy {
     this.editingRate.set(rate);
     this.editForm = {
       grades: [...rate.grades],
+      platformFee: rate.platformFee ?? 0,
     };
   }
 
@@ -181,7 +183,10 @@ export class AdminDashboard implements OnDestroy {
     const rate = this.editingRate();
     if (!rate?.id) return;
     try {
-      await this.adminService.updateRate(rate.id, { grades: this.editForm.grades });
+      await this.adminService.updateRate(rate.id, {
+        grades: this.editForm.grades,
+        platformFee: this.editForm.platformFee,
+      });
       this.editingRate.set(null);
     } catch (error) {
       console.error('Failed to save rate:', error);

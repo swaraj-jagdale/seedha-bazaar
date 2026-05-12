@@ -131,16 +131,19 @@ export class RateForm implements OnInit {
     this.loading = true;
 
     try {
-      const rateData = {
+      const rateData: any = {
         merchantId: user.uid,
         merchantName: user.displayName || 'Unknown',
         mandi: this.getMandiName(),
         crop: this.getCropName(),
-        photo: this.photo || undefined,
         grades: this.grades,
         platformFee: 0,
         status: 'pending' as const,
       };
+
+      if (this.photo) {
+        rateData.photo = this.photo;
+      }
 
       if (this.editRate?.id) {
         await this.ratesService.updateRate(this.editRate.id, rateData);
