@@ -165,6 +165,7 @@ const en: TranslationMap = {
   'farmerDashboard.quantity': 'Quantity',
   'farmerDashboard.price': 'Price',
   'farmerDashboard.total': 'Total',
+  'farmerDashboard.totalAmount': 'Total Amount',
   'farmerDashboard.commission': 'Platform Fee',
   'farmerDashboard.youGet': 'You Receive',
   'farmerDashboard.logistics': 'Logistics',
@@ -444,6 +445,7 @@ const hi: TranslationMap = {
   'farmerDashboard.quantity': '\u092E\u093E\u0924\u094D\u0930\u093E',
   'farmerDashboard.price': '\u092E\u0942\u0932\u094D\u092F',
   'farmerDashboard.total': '\u0915\u0941\u0932',
+  'farmerDashboard.totalAmount': '\u0915\u0941\u0932 \u0930\u093E\u0936\u093F',
   'farmerDashboard.commission':
     '\u092A\u094D\u0932\u0947\u091F\u092B\u0949\u0930\u094D\u092E \u0936\u0941\u0932\u094D\u0915',
   'farmerDashboard.youGet': '\u0906\u092A\u0915\u094B \u092E\u093F\u0932\u0947\u0917\u093E',
@@ -745,6 +747,7 @@ const mr: TranslationMap = {
   'farmerDashboard.quantity': '\u092A\u094D\u0930\u092E\u093E\u0923',
   'farmerDashboard.price': '\u0915\u093F\u0902\u092E\u0924',
   'farmerDashboard.total': '\u090F\u0915\u0942\u0923',
+  'farmerDashboard.totalAmount': '\u090F\u0915\u0942\u0903 \u0930\u093E\u0936\u093F',
   'farmerDashboard.commission':
     '\u092A\u094D\u0932\u0945\u091F\u092B\u0949\u0930\u094D\u092E \u0936\u0941\u0932\u094D\u0915',
   'farmerDashboard.youGet':
