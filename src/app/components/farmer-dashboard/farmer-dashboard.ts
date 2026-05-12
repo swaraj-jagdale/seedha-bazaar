@@ -114,7 +114,7 @@ export class FarmerDashboard implements OnDestroy {
   get estimatedPrice(): number {
     const rate = this.selectedRate();
     if (!rate) return 0;
-    const price = this.getNetPrice(rate, this.orderGrade);
+    const price = this.getGradePrice(rate, this.orderGrade);
     let qty = this.orderQuantity;
     if (this.orderUnit === 'ton') qty *= 1000;
     if (this.orderUnit === 'box') qty *= 20;

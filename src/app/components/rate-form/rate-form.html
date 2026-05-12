@@ -9,35 +9,8 @@
     <form (ngSubmit)="onSubmit()">
       <div class="form-row">
         <div class="form-group">
-          <label>{{ lang.t('rateForm.crop') }}</label>
-          <select [(ngModel)]="selectedCrop" name="crop" (ngModelChange)="onCropChange()" required>
-            <option value="" disabled>{{ lang.t('rateForm.selectCrop') }}</option>
-            @for (crop of crops; track crop.name) {
-              <option [value]="crop.name">{{ crop.name }}</option>
-            }
-            <option value="__custom__">+ {{ lang.t('rateForm.customCrop') }}</option>
-          </select>
-        </div>
-        <div class="form-group">
           <label>{{ lang.t('rateForm.mandi') }}</label>
-          <select
-            [(ngModel)]="selectedMandi"
-            name="mandi"
-            (ngModelChange)="onMandiChange()"
-            required
-          >
-            @for (mandi of mandis; track mandi) {
-              <option [value]="mandi">{{ mandi }}</option>
-            }
-            <option value="__custom__">+ {{ lang.t('rateForm.customMandi') }}</option>
-          </select>
-        </div>
-      </div>
-
-      @if (isCustomMandi) {
-        <div class="form-row custom-mandi-row">
-          <div class="form-group">
-            <label>{{ lang.t('rateForm.mandiName') }} *</label>
+          @if (isCustomMandi) {
             <input
               type="text"
               [(ngModel)]="customMandiName"
@@ -45,29 +18,41 @@
               placeholder="e.g. Nashik Mandi, Pune Mandi"
               required
             />
-          </div>
+          } @else {
+            <select
+              [(ngModel)]="selectedMandi"
+              name="mandi"
+              (ngModelChange)="onMandiChange()"
+              required
+            >
+              @for (mandi of mandis; track mandi) {
+                <option [value]="mandi">{{ mandi }}</option>
+              }
+              <option value="__custom__">+ {{ lang.t('rateForm.customMandi') }}</option>
+            </select>
+          }
         </div>
-      }
+      </div>
 
       <div class="form-row">
         <div class="form-group">
           <label>{{ lang.t('rateForm.crop') }}</label>
-          <div class="crop-select">
-            <select [(ngModel)]="selectedCrop" (change)="onCropChange()" name="crop">
+          @if (isCustomCrop) {
+            <input
+              type="text"
+              [(ngModel)]="customCropName"
+              name="customCropName"
+              placeholder="{{ lang.t('rateForm.cropNamePlaceholder') }}"
+              required
+            />
+          } @else {
+            <select [(ngModel)]="selectedCrop" (change)="onCropChange()" name="crop" required>
               @for (crop of crops; track crop.name) {
                 <option [value]="crop.name">{{ crop.name }}</option>
               }
-              <option value="__custom__">{{ lang.t('rateForm.customCrop') }}</option>
+              <option value="__custom__">+ {{ lang.t('rateForm.customCrop') }}</option>
             </select>
-            @if (isCustomCrop) {
-              <input
-                type="text"
-                [(ngModel)]="customCropName"
-                name="customCropName"
-                placeholder="{{ lang.t('rateForm.cropNamePlaceholder') }}"
-              />
-            }
-          </div>
+          }
         </div>
       </div>
 

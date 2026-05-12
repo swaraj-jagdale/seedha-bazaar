@@ -193,20 +193,10 @@ export class AdminDashboard implements OnDestroy {
   async approveRate(rate: CropRate) {
     if (!rate.id) return;
     if (confirm(`Are you sure you want to approve the rate for ${rate.crop}?`)) {
-      await this.adminService.updateRate(rate.id, { status: 'approved' as const });
-    }
-  }
-
-  async savePlatformFee(rate: CropRate) {
-    if (!rate.id) return;
-    await this.adminService.updateRate(rate.id, { platformFee: rate.platformFee ?? 0 });
-  }
-
-  updatePlatformFee(rateId: string, value: number) {
-    const rates = this.adminService.allRates();
-    const rate = rates.find((r: CropRate) => r.id === rateId);
-    if (rate) {
-      rate.platformFee = value;
+      await this.adminService.updateRate(rate.id, {
+        status: 'approved' as const,
+        platformFee: rate.platformFee ?? 0,
+      });
     }
   }
 

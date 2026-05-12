@@ -126,16 +126,13 @@
               <div class="platform-fee-section">
                 <div class="form-group">
                   <label>Platform Fee (₹/kg)</label>
-                  <div class="input-with-action">
-                    <input
-                      type="number"
-                      [(ngModel)]="rate.platformFee"
-                      min="0"
-                      step="0.5"
-                      placeholder="Enter platform fee"
-                    />
-                    <button class="save-fee-btn" (click)="savePlatformFee(rate)">💾</button>
-                  </div>
+                  <input
+                    type="number"
+                    [(ngModel)]="rate.platformFee"
+                    min="0"
+                    step="0.5"
+                    placeholder="Enter platform fee before approving"
+                  />
                 </div>
               </div>
             }

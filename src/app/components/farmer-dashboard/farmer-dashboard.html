@@ -275,6 +275,14 @@
           </div>
 
           <div class="estimate-box">
+            <div class="estimate-row">
+              <span>{{ lang.t('farmerDashboard.totalAmount') }}</span>
+              <strong>{{ orderService.formatAmount(estimatedPrice) }}</strong>
+            </div>
+            <div class="estimate-row">
+              <span>{{ lang.t('farmerDashboard.platformFee') }}</span>
+              <strong>{{ orderService.formatAmount(estimatedCommission.commission) }}</strong>
+            </div>
             <div class="estimate-row net">
               <span>{{ lang.t('farmerDashboard.youGet') }}</span>
               <strong>{{
