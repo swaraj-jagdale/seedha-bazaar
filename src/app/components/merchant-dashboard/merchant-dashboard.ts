@@ -144,6 +144,32 @@ export class MerchantDashboard implements OnDestroy {
     });
   }
 
+  async acceptOrder(order: Order) {
+    if (!order.id) return;
+    this.openConfirmDialog(
+      'Accept Order',
+      `Accept order for ${order.quantity}kg of ${order.crop} from ${order.farmerName}?`,
+      async () => {
+        try {
+          await this.orderService.acceptOrder(order.id!);
+        } catch {
+          alert('Failed to accept order. Please try again.');
+        }
+      },
+    );
+  }
+
+  async rejectOrder(order: Order) {
+    if (!order.id) return;
+    const reason = prompt(this.lang.t('merchantDashboard.rejectReason'));
+    if (!reason) return;
+    try {
+      await this.orderService.rejectOrder(order.id, reason);
+    } catch {
+      alert('Failed to reject order. Please try again.');
+    }
+  }
+
   formatPrice(price: number): string {
     return this.ratesService.formatPrice(price);
   }

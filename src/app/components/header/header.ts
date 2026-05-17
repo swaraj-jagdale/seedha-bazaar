@@ -2,6 +2,7 @@ import { Component, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { LanguageService } from '../../services/language.service';
+import { AppSettingsService } from '../../services/app-settings.service';
 
 @Component({
   selector: 'app-header',
@@ -12,7 +13,11 @@ import { LanguageService } from '../../services/language.service';
 export class Header {
   menuOpen = signal(false);
 
-  constructor(public authService: AuthService, public lang: LanguageService) {}
+  constructor(
+    public authService: AuthService,
+    public lang: LanguageService,
+    public appSettingsService: AppSettingsService,
+  ) {}
 
   toggleMenu() {
     this.menuOpen.update((v) => !v);

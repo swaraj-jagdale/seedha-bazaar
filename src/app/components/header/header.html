@@ -49,9 +49,9 @@
 
     <div class="header-right">
       <button class="lang-toggle" (click)="toggleLanguage()">{{ lang.t('lang.switchTo') }}</button>
-      <a href="tel:9432446384" class="phone-link">
+      <a [href]="'tel:' + appSettingsService.getPhoneNumber()" class="phone-link">
         <img src="assets/images/phone-icon.svg" alt="Phone" width="18" height="18" />
-        <span>9432446384</span>
+        <span>{{ appSettingsService.getPhoneNumber() }}</span>
       </a>
       @if (authService.isAdmin()) {
         <a routerLink="/admin/dashboard" class="admin-btn">Admin Panel</a>

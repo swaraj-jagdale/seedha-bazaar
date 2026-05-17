@@ -65,7 +65,9 @@
     }
 
     <div class="call-cta">
-      <a href="tel:9432446384" class="call-btn">{{ lang.t('rates.callNow') }}: 9432446384</a>
+      <a [href]="'tel:' + appSettingsService.getPhoneNumber()" class="call-btn"
+        >{{ lang.t('rates.callNow') }}: {{ appSettingsService.getPhoneNumber() }}</a
+      >
       <p class="call-subtitle">{{ lang.t('rates.callSubtitle') }}</p>
     </div>
   </div>

@@ -115,7 +115,7 @@
                 <div class="order-crop">
                   <div class="crop-placeholder">{{ order.crop.charAt(0) }}</div>
                   <div>
-                    <h4>{{ order.crop }} - {{ lang.t('rates.grade' + order.grade) }}</h4>
+                    <h4>{{ order.crop }} - {{ order.grade }}</h4>
                     <span class="order-farmer"
                       >{{ lang.t('merchantDashboard.from') }} {{ order.farmerName }} ({{
                         order.farmerVillage
@@ -137,18 +137,20 @@
                   <span>{{ lang.t('farmerDashboard.total') }}</span>
                   <strong>{{ orderService.formatAmount(order.totalAmount) }}</strong>
                 </div>
-                <div class="detail-row">
-                  <span>{{ lang.t('merchantDashboard.yourCommission') }}</span>
-                  <strong class="commission-earn"
-                    >+{{ orderService.formatAmount(order.commission) }}</strong
-                  >
-                </div>
               </div>
               @if (order.farmerNotes) {
                 <div class="farmer-notes">
                   {{ lang.t('farmerDashboard.notes') }}: {{ order.farmerNotes }}
                 </div>
               }
+              <div class="order-actions">
+                <button class="accept-btn" (click)="acceptOrder(order)">
+                  {{ lang.t('merchantDashboard.accept') }}
+                </button>
+                <button class="reject-btn" (click)="rejectOrder(order)">
+                  {{ lang.t('merchantDashboard.reject') }}
+                </button>
+              </div>
             </div>
           }
         </div>
@@ -166,7 +168,7 @@
                 <div class="order-crop">
                   <div class="crop-placeholder">{{ order.crop.charAt(0) }}</div>
                   <div>
-                    <h4>{{ order.crop }} - {{ lang.t('rates.grade' + order.grade) }}</h4>
+                    <h4>{{ order.crop }} - {{ order.grade }}</h4>
                     <span class="order-farmer"
                       >{{ order.farmerName }} | {{ order.quantity }} kg |
                       {{ orderService.formatAmount(order.totalAmount) }}</span

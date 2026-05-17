@@ -108,7 +108,7 @@
                 <div class="order-crop">
                   <div class="crop-placeholder">{{ order.crop.charAt(0) }}</div>
                   <div>
-                    <h4>{{ order.crop }} - {{ lang.t('rates.grade' + order.grade) }}</h4>
+                    <h4>{{ order.crop }} - {{ order.grade }}</h4>
                     <span class="order-merchant"
                       >{{ lang.t('farmerDashboard.to') }} {{ order.merchantName }} ({{
                         order.mandi
@@ -127,7 +127,9 @@
                 </div>
                 <div class="detail-row">
                   <span>{{ lang.t('farmerDashboard.price') }}</span>
-                  <strong>{{ orderService.formatAmount(order.pricePerUnit) }}/kg</strong>
+                  <strong
+                    >{{ orderService.formatAmount(order.netAmount / order.quantity) }}/kg</strong
+                  >
                 </div>
                 <div class="detail-row net">
                   <span>{{ lang.t('farmerDashboard.youGet') }}</span>

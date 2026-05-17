@@ -37,7 +37,7 @@ export class MandiRates implements OnDestroy {
   constructor(
     public ratesService: RatesService,
     public lang: LanguageService,
-    private appSettingsService: AppSettingsService,
+    public appSettingsService: AppSettingsService,
   ) {
     // Initialize from app settings
     this.selectedMandi.set(this.appSettingsService.getDefaultMandi());
