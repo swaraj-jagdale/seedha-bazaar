@@ -132,17 +132,41 @@ export class FarmerLogin {
     this.error.set('');
     try {
       await this.authService.login(this.loginEmail, this.loginPassword);
-      // Wait briefly for profile to load and check role
-      await new Promise((r) => setTimeout(r, 500));
-      if (this.authService.isMerchant()) {
+      const role = await this.authService.waitForRole();
+
+      if (role === 'merchant') {
         this.error.set('This is a merchant account. Please use Merchant Login.');
         await this.authService.logout();
         this.isLoading.set(false);
         return;
       }
+      if (role === 'admin') {
+        this.error.set('This is an admin account. Please use Admin Login.');
+        await this.authService.logout();
+        this.isLoading.set(false);
+        return;
+      }
+      if (role !== 'farmer') {
+        this.error.set('No farmer profile found for this account. Please register first.');
+        await this.authService.logout();
+        this.isLoading.set(false);
+        return;
+      }
+
       this.router.navigate(['/farmer/dashboard']);
     } catch (err: any) {
-      this.error.set(err.message || 'Login failed');
+      const code = err?.code || '';
+      if (
+        code === 'auth/invalid-credential' ||
+        code === 'auth/wrong-password' ||
+        code === 'auth/user-not-found'
+      ) {
+        this.error.set('Invalid email or password.');
+      } else if (code === 'auth/invalid-email') {
+        this.error.set('Please enter a valid email address.');
+      } else {
+        this.error.set(err.message || 'Login failed. Please try again.');
+      }
     } finally {
       this.isLoading.set(false);
     }

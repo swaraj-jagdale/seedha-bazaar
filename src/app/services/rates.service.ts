@@ -151,11 +151,18 @@ export class RatesService {
     if (rate.platformFee !== undefined && rate.platformFee !== null && rate.platformFee < 0) {
       throw new Error('Platform fee cannot be negative');
     }
-    return addDoc(this.ratesCollection, {
-      ...rate,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    });
+    try {
+      return addDoc(this.ratesCollection, {
+        ...rate,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+    } catch (error: any) {
+      console.error('Firestore addRate error:', error);
+      console.error('Error code:', error.code);
+      console.error('Error message:', error.message);
+      throw error;
+    }
   }
 
   async updateRate(id: string, rate: Partial<CropRate>) {

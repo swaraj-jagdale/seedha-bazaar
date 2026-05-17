@@ -19,6 +19,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  text-decoration: none;
 }
 
 .logo-text {
@@ -51,12 +52,16 @@
 .nav-links {
   display: flex;
   gap: 25px;
+  align-items: center;
+  margin: 1rem;
 
   a {
     color: #333;
     font-size: 0.95rem;
     font-weight: 500;
     transition: color 0.3s;
+    text-decoration: none;
+    white-space: nowrap;
 
     &:hover {
       color: #3a5a2c;
@@ -77,9 +82,14 @@
   color: #3a5a2c;
   font-weight: 600;
   font-size: 0.95rem;
+  text-decoration: none;
 
   svg {
     flex-shrink: 0;
+  }
+
+  &:hover {
+    text-decoration: none;
   }
 }
 
@@ -119,11 +129,13 @@
 .merchant-link {
   color: #3a5a2c !important;
   font-weight: 600 !important;
+  text-decoration: none !important;
 }
 
 .farmer-link {
   color: #e67e22 !important;
   font-weight: 600 !important;
+  text-decoration: none !important;
 }
 
 .merchant-btn {
@@ -135,9 +147,12 @@
   font-size: 0.9rem;
   font-weight: 600;
   transition: background 0.3s;
+  white-space: nowrap;
+  text-decoration: none;
 
   &:hover {
     background: #2d4a1f;
+    text-decoration: none;
   }
 }
 
@@ -150,15 +165,19 @@
   font-size: 0.9rem;
   font-weight: 600;
   transition: background 0.3s;
+  white-space: nowrap;
+  text-decoration: none;
 
   &:hover {
     background: #d35400;
+    text-decoration: none;
   }
 }
 
 .admin-link {
   color: #c0392b !important;
   font-weight: 600 !important;
+  text-decoration: none !important;
 }
 
 .admin-btn {
@@ -170,9 +189,12 @@
   font-size: 0.9rem;
   font-weight: 600;
   transition: background 0.3s;
+  white-space: nowrap;
+  text-decoration: none;
 
   &:hover {
     background: #a93226;
+    text-decoration: none;
   }
 }
 

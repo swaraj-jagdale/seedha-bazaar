@@ -153,6 +153,7 @@ export class RateForm implements OnInit {
 
       this.saved.emit();
     } catch (err) {
+      console.error('Failed to save rate:', err);
       this.error = 'Failed to save rate. Please try again.';
     } finally {
       this.loading = false;

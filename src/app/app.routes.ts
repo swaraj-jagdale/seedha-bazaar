@@ -8,6 +8,7 @@ import { AdminLogin } from './components/admin-login/admin-login';
 import { AdminDashboard } from './components/admin-dashboard/admin-dashboard';
 import { authGuard } from './guards/auth.guard';
 import { farmerGuard } from './guards/farmer.guard';
+import { adminGuard } from './guards/admin.guard';
 
 export const routes: Routes = [
   { path: '', component: Home },
@@ -16,6 +17,6 @@ export const routes: Routes = [
   { path: 'farmer/login', component: FarmerLogin },
   { path: 'farmer/dashboard', component: FarmerDashboard, canActivate: [farmerGuard] },
   { path: 'admin/login', component: AdminLogin },
-  { path: 'admin/dashboard', component: AdminDashboard },
+  { path: 'admin/dashboard', component: AdminDashboard, canActivate: [adminGuard] },
   { path: '**', redirectTo: '' },
 ];

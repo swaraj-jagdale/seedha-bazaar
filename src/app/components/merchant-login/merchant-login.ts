@@ -29,7 +29,7 @@ export class MerchantLogin {
   constructor(
     public authService: AuthService,
     private router: Router,
-    public lang: LanguageService
+    public lang: LanguageService,
   ) {
     if (this.authService.isLoggedIn() && this.authService.isMerchant()) {
       this.router.navigate(['/merchant/dashboard']);
@@ -96,10 +96,22 @@ export class MerchantLogin {
         });
       } else {
         await this.authService.login(this.email, this.password);
-        // Wait briefly for profile to load and check role
-        await new Promise(r => setTimeout(r, 500));
-        if (this.authService.isFarmer()) {
+        const role = await this.authService.waitForRole();
+
+        if (role === 'farmer') {
           this.error.set('This is a farmer account. Please use Farmer Login.');
+          await this.authService.logout();
+          this.loading.set(false);
+          return;
+        }
+        if (role === 'admin') {
+          this.error.set('This is an admin account. Please use Admin Login.');
+          await this.authService.logout();
+          this.loading.set(false);
+          return;
+        }
+        if (role !== 'merchant') {
+          this.error.set('No merchant profile found for this account. Please register first.');
           await this.authService.logout();
           this.loading.set(false);
           return;
@@ -110,7 +122,11 @@ export class MerchantLogin {
       const code = err?.code || '';
       if (code === 'auth/email-already-in-use') {
         this.error.set('This email is already registered. Please login.');
-      } else if (code === 'auth/invalid-credential' || code === 'auth/wrong-password' || code === 'auth/user-not-found') {
+      } else if (
+        code === 'auth/invalid-credential' ||
+        code === 'auth/wrong-password' ||
+        code === 'auth/user-not-found'
+      ) {
         this.error.set('Invalid email or password.');
       } else if (code === 'auth/weak-password') {
         this.error.set('Password must be at least 6 characters.');

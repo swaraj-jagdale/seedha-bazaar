@@ -63,8 +63,11 @@
         <a routerLink="/farmer/dashboard" class="farmer-btn">{{
           lang.t('header.farmerDashboard')
         }}</a>
-      } @else if (!authService.isLoggedIn()) {
+      } @else {
         <a routerLink="/farmer/login" class="farmer-btn">{{ lang.t('header.farmerLogin') }}</a>
+        <a routerLink="/merchant/login" class="merchant-btn">{{
+          lang.t('header.merchantLogin')
+        }}</a>
       }
       <button class="hamburger" (click)="toggleMenu()" [class.active]="menuOpen()">
         <span></span>

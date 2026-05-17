@@ -18,7 +18,7 @@ service cloud.firestore {
 
     // Merchants collection
     match /merchants/{merchantId} {
-      allow read: if isAuthenticated();
+      allow read: if isAuthenticated() && merchantId == request.auth.uid;
       allow create: if isOwner(merchantId)
                     && isValidString(request.resource.data.displayName, 100)
                     && isValidString(request.resource.data.email, 100);
@@ -30,7 +30,7 @@ service cloud.firestore {
 
     // Farmers collection
     match /farmers/{farmerId} {
-      allow read: if isAuthenticated();
+      allow read: if isAuthenticated() && farmerId == request.auth.uid;
       allow create: if isOwner(farmerId)
                     && isValidString(request.resource.data.displayName, 100)
                     && isValidString(request.resource.data.email, 100);
@@ -47,14 +47,10 @@ service cloud.firestore {
       // Only the merchant who owns the rate can create/update/delete
       allow create: if isAuthenticated()
                     && request.resource.data.merchantId == request.auth.uid
-                    && request.resource.data.pricePerUnit is number
-                    && request.resource.data.pricePerUnit > 0
-                    && request.resource.data.pricePerUnit < 100000;
+                    && request.resource.data.grades is list
+                    && request.resource.data.grades.size() > 0;
       allow update: if isAuthenticated()
-                    && resource.data.merchantId == request.auth.uid
-                    && request.resource.data.pricePerUnit is number
-                    && request.resource.data.pricePerUnit > 0
-                    && request.resource.data.pricePerUnit < 100000;
+                    && resource.data.merchantId == request.auth.uid;
       allow delete: if isAuthenticated()
                     && resource.data.merchantId == request.auth.uid;
     }
@@ -94,6 +90,18 @@ service cloud.firestore {
 
       // Orders cannot be deleted
       allow delete: if false;
+    }
+
+    // Admins collection (for Firebase-based admin accounts, if any)
+    match /admins/{adminId} {
+      allow read: if isAuthenticated();
+      allow write: if false; // Admins can only be created manually
+    }
+
+    // App Settings collection (public read for hero location, phone, etc.)
+    match /appSettings/{settingId} {
+      allow read: if true; // Public read for homepage settings
+      allow write: if false; // Only admins can write (via Firebase Console)
     }
 
     // Deny all other collections by default

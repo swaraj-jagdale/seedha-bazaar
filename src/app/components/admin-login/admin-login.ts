@@ -19,7 +19,7 @@ export class AdminLogin {
   constructor(
     private authService: AuthService,
     private router: Router,
-    public lang: LanguageService
+    public lang: LanguageService,
   ) {
     if (this.authService.isLoggedIn() && this.authService.isAdmin()) {
       this.router.navigate(['/admin/dashboard']);
@@ -29,18 +29,27 @@ export class AdminLogin {
   async onSubmit() {
     this.error.set('');
     this.loading.set(true);
+
+    if (!this.email || !this.password) {
+      this.error.set('Please enter email and password.');
+      this.loading.set(false);
+      return;
+    }
+
     try {
       await this.authService.login(this.email, this.password);
-      await new Promise(r => setTimeout(r, 500));
-      if (!this.authService.isAdmin()) {
-        this.error.set('Access denied. This account is not an admin.');
+
+      // Check if user is admin after login
+      const role = await this.authService.waitForRole();
+      if (role === 'admin') {
+        this.router.navigate(['/admin/dashboard']);
+      } else {
+        this.error.set('Access denied. Admin access only.');
         await this.authService.logout();
-        this.loading.set(false);
-        return;
       }
-      this.router.navigate(['/admin/dashboard']);
-    } catch {
-      this.error.set('Invalid email or password.');
+    } catch (err: any) {
+      console.error('Admin login error:', err);
+      this.error.set(err.message || 'Login failed. Please try again.');
     } finally {
       this.loading.set(false);
     }

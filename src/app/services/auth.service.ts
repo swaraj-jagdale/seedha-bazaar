@@ -45,6 +45,7 @@ export class AuthService {
 
   constructor() {
     onAuthStateChanged(auth, async (user) => {
+      console.log('[AuthService] onAuthStateChanged fired, user:', user?.uid || 'null');
       this.currentUser.set(user);
       if (user) {
         await this.loadUserProfile(user.uid);
@@ -54,36 +55,86 @@ export class AuthService {
         this.userRole.set(null);
       }
       this.loading.set(false);
+      console.log(
+        '[AuthService] Auth state resolved. Role:',
+        this.userRole(),
+        'Loading:',
+        this.loading(),
+      );
+    });
+  }
+
+  /**
+   * Wait until the user role is resolved after login.
+   * Waits for loading to complete AND role to be set, then returns the role.
+   */
+  waitForRole(timeoutMs = 10000): Promise<UserRole | null> {
+    return new Promise((resolve) => {
+      console.log(
+        '[AuthService] waitForRole started. Current loading:',
+        this.loading(),
+        'role:',
+        this.userRole(),
+      );
+      const start = Date.now();
+      const check = () => {
+        // Wait for loading to complete AND role to be set (or confirmed null)
+        if (!this.loading() && (this.userRole() !== null || !this.currentUser())) {
+          console.log('[AuthService] waitForRole resolved with role:', this.userRole());
+          resolve(this.userRole());
+        } else if (Date.now() - start > timeoutMs) {
+          // Timeout - resolve with current role
+          console.warn(
+            '[AuthService] waitForRole TIMEOUT after',
+            timeoutMs,
+            'ms. Role:',
+            this.userRole(),
+          );
+          resolve(this.userRole());
+        } else {
+          setTimeout(check, 50);
+        }
+      };
+      check();
     });
   }
 
   private async loadUserProfile(uid: string) {
     try {
+      console.log('[AuthService] Loading profile for uid:', uid);
+
       // Check admin first
       const adminRef = doc(db, 'admins', uid);
       const adminSnap = await getDoc(adminRef);
       if (adminSnap.exists()) {
         this.userRole.set('admin');
+        console.log('[AuthService] Loaded admin profile for uid:', uid);
         return;
       }
+
       // Check merchant profile
       const merchantRef = doc(db, 'merchants', uid);
       const merchantSnap = await getDoc(merchantRef);
       if (merchantSnap.exists()) {
         this.merchantProfile.set(merchantSnap.data() as MerchantProfile);
         this.userRole.set('merchant');
+        console.log('[AuthService] Loaded merchant profile for uid:', uid);
         return;
       }
+
       // Check farmer profile
       const farmerRef = doc(db, 'farmers', uid);
       const farmerSnap = await getDoc(farmerRef);
       if (farmerSnap.exists()) {
         this.farmerProfile.set(farmerSnap.data() as FarmerProfile);
         this.userRole.set('farmer');
+        console.log('[AuthService] Loaded farmer profile for uid:', uid);
         return;
       }
-    } catch {
-      // Profile not found is ok
+
+      console.warn('[AuthService] No profile found for uid:', uid);
+    } catch (error) {
+      console.error('[AuthService] Error loading profile for uid:', uid, error);
     }
   }
 
@@ -125,11 +176,16 @@ export class AuthService {
       district: this.sanitizeInput(profile.district),
       taluka: this.sanitizeInput(profile.taluka),
       pincode: this.sanitizeInput(profile.pincode),
-      crops: profile.crops.map(c => this.sanitizeInput(c)),
+      crops: profile.crops.map((c) => this.sanitizeInput(c)),
       acreage: profile.acreage,
       email,
     };
+
+    console.log('[AuthService] Saving farmer profile for uid:', cred.user.uid);
     await setDoc(doc(db, 'farmers', cred.user.uid), farmerData);
+    console.log('[AuthService] Farmer profile saved successfully for uid:', cred.user.uid);
+
+    // Manually load the profile to ensure it's set
     this.farmerProfile.set(farmerData);
     this.userRole.set('farmer');
 
